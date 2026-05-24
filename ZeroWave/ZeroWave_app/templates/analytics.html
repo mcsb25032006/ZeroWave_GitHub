@@ -1,0 +1,680 @@
+
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ZeroWave — Analytics Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Chart.js v4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Leaflet for map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  
+  <style>
+    :root{
+      --primary: #8A9A5B;
+      --primary-glow: #A2B570;
+      --secondary: #E2725B;
+      --bg: #F0F8A4;
+      --card: #ffffff;
+      --muted: #6E7A5A;
+      --accent: #8A9A5B; /* Sage Green */
+      --accent-2: #E2725B; /* Terracotta Clay */
+      --brown: #5C4033;
+      --glass: rgba(255, 255, 255, 0.7);
+      --shadow: 0 8px 24px rgba(138, 154, 91, 0.06);
+      --radius: 16px;
+      --text: #333333;
+      --border: #e2e8f0;
+      --mono: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    
+    [data-theme="dark"]{
+      --bg: #141811;
+      --text: #E6EAE0;
+      --muted: #9AA38F;
+      --card: #1D2219;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      --glass: rgba(29, 34, 25, 0.7);
+      --border: #2B3326;
+    }
+    
+    [data-theme="dark"] body {
+      background: var(--bg);
+    }
+    
+    
+    *{
+      box-sizing:border-box
+    }
+
+    body{
+      margin:0;
+      padding-bottom: 1.5em;
+      background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      min-height:100vh;
+      display:flex
+    }
+    
+    .main{
+      flex:1;
+      margin-left: 7px;
+      padding-left: -25px;
+      display:flex;
+      flex-direction:column;
+      min-width: 0;
+      width: calc(100% - 260px);
+      max-width:max-content;
+    }
+
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 1.25rem;
+      border-bottom:1px solid hsl(210 16% 92%)
+    }
+
+    .search{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:var(--card);
+      padding:8px 12px;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      min-width:320px
+    }
+
+    .search input{
+      border:0;
+      outline:none;
+      background:transparent;
+      font-size:14px;
+      color:inherit
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-bottom:16px
+    }
+
+    .card{
+      background:var(--card);
+      padding:16px;
+      border-radius:12px;
+      box-shadow:var(--shadow)
+    }
+
+    .card h4{
+      margin:0;
+      color:var(--muted);
+      font-weight:600;
+      font-size:13px
+    }
+
+    .card .value{
+      font-size:22px;
+      font-weight:800;
+      margin-top:8px;
+      color:#083826
+    }
+    [data-theme="dark"] .card .value{
+      color: var(--primary-glow);
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:14px
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px
+    }
+
+    .chart-wrap{
+      height:320px;
+      padding:8px
+    }
+
+    .small{
+      font-size:13px;
+      color:var(--muted)
+    }
+
+    .table{
+      width:100%;
+      border-collapse:collapse
+    }
+
+    .table th,.table td{
+      padding:8px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:13px
+    }
+
+    .badge{
+      padding:6px 8px;
+      border-radius:8px;
+      font-weight:700;
+      font-size:12px
+    }
+    
+    .fraud{
+      background:#ffe6e6;
+      color:#8c1b1b
+    }
+
+    .approved{
+      background:#e6fff2;
+      color:#0d6b3f
+    }
+
+    .pending{
+      background:#fff4e6;
+      color:#8a5b00
+    }
+
+    .map-card{
+      height:360px;
+      border-radius:10px;
+      overflow:hidden
+    }
+
+    .controls{
+      display:flex;
+      gap:8px;
+      align-items:center
+    }
+
+    .btn{
+      background:var(--accent);
+      color:white;
+      padding:8px 10px;
+      border-radius:8px;
+      border:0;
+      cursor:pointer
+    }
+
+    .ghost{
+      background:transparent;
+      border:1px solid #dbeee0;
+      color:#0b3b2e;
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer
+    }
+    [data-theme="dark"] .ghost{
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px
+    }
+
+    @media(max-width:980px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+      .cards{
+        grid-template-columns:1fr}
+        .grid-2{
+          grid-template-columns:1fr
+        }
+        .grid-3{
+          grid-template-columns:1fr
+        }
+      }
+
+    .anomaly-item .status {
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: capitalize;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+    .status.investigate { background: #fff3cd; color: #856404; }
+    .status.flagged { background: #f8d7da; color: #721c24; }
+    .status.fraud { background: #f5c6cb; color: #721c24; }
+
+  </style>
+</head>
+<body>
+  <!-- <div class="layout"> -->
+    
+  {% include 'sidebar.html' %}
+
+  <main class="main" role="main">
+    <div class="topbar">
+      <div style="display:flex;gap:12px;align-items:center">
+        <!-- <h1 style="margin:0;font-family:Poppins,Inter,sans-serif">Dashboard</h1><br>
+        <p class="muted" style="margin:.25rem 0 0">Here's your sustainability impact overview</p><br> -->
+        <div class="search" role="search">
+          <i class="fa-solid fa-magnifying-glass" style="color:#0b3b2e"></i>
+          <input id="q" placeholder="Search data, hubs, transactions..." />
+        </div>
+        <div class="controls">
+          <button class="ghost" onclick="exportCSV()">Export CSV</button>
+          <button class="btn" onclick="downloadPNG()">Download Charts</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="small">Notifications</div>
+        <i class="fa-solid fa-bell" style="font-size:16px;color:#0b3b2e"></i>
+      </div>
+      <button id="themeToggle" class="btn" aria-label="Toggle theme">🌓</button>
+    </div>
+
+    <!-- Summary cards -->
+    <section class="cards" aria-label="Summary metrics">
+      <div class="card">
+        <h4>Waste Recycled</h4>
+        <div class="value" id="totalWaste">0 kg</div>
+        <div class="small">Total organic waste collected in selected period</div>
+      </div>
+      <div class="card">
+        <h4>Energy Generated</h4>
+        <div class="value" id="energyGen">0 kWh</div>
+        <div class="small">Estimated from biogas & anaerobic digestion</div>
+      </div>
+      <div class="card">
+        <h4>Carbon Credits Issued</h4>
+        <div class="value" id="credits">0</div>
+        <div class="small">Verified and tokenized carbon credits</div>
+      </div>
+    </section>
+
+    <section class="grid-2" aria-label="Charts and map">
+      <div>
+        <div class="card">
+          <h4>Weekly Contribution Trend</h4>
+          <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+          <div class="small">Daily collected waste (kg) and energy generated (kWh)</div>
+        </div>
+
+        <div style="display:flex;gap:14px;margin-top:14px">
+          <div class="card" style="flex:1">
+            <h4>Waste Composition</h4>
+            <div class="chart-wrap" style="height:220px"><canvas id="pieChart"></canvas></div>
+            <div class="small">Breakdown by waste type</div>
+          </div>
+
+          <div class="card" style="width:360px">
+            <h4>Top Households / Hubs</h4>
+            <table class="table" aria-label="Top households">
+              <thead><tr><th>Hub</th><th>kg</th><th>credits</th></tr></thead>
+              <tbody id="topTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:14px;margin-top:14px">
+          <div class="card" style="flex:1">
+            <h4>Energy vs Waste (Scatter)</h4>
+            <div class="chart-wrap" style="height:260px"><canvas id="scatter"></canvas></div>
+            <div class="small">Each point = one drop event (kg vs kWh)</div>
+          </div>
+
+          <div class="card" style="width:360px">
+            <h4>Anomalies & Flags</h4>
+            <div id="anomalyList" style="max-height:190px;overflow:auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <aside>
+        <div class="card map-card">
+          <h4>Impact Map — Nairobi</h4>
+          <div id="map" style="height:290px"></div>
+          <div class="small" style="margin-top:6px">Hover markers for details. Color indicates status.</div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <h4>Token Issuance Over Time</h4>
+          <div class="chart-wrap" style="height:180px"><canvas id="barChart"></canvas></div>
+          <div class="small">ZeroTokens issued per week</div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <h4>Community Leaderboard</h4>
+          <ol id="leaderboard" style="padding-left:18px;margin:6px 0"></ol>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid-3" style="margin-top:14px" aria-label="More analytics">
+      <div class="card">
+        <h4>Waste by Region (Stacked)</h4>
+        <div class="chart-wrap" style="height:220px"><canvas id="stacked"></canvas></div>
+        <div class="small">Comparison across areas</div>
+      </div>
+
+      <div class="card">
+        <h4>User Progress Radar</h4>
+        <div class="chart-wrap" style="height:220px"><canvas id="radar"></canvas></div>
+        <div class="small">Profile: consistency, variety, impact, redeeming, engagement</div>
+      </div>
+
+      <div class="card">
+        <h4>Transactions / Recent Activity</h4>
+        <div id="txList" style="max-height:220px;overflow:auto"></div>
+      </div>
+    </section>
+
+  </main>
+  </div>
+  </body>
+
+  {% include 'chatbox.html' %}
+
+  <!-- Dependencies -->
+  <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
+
+  <script>
+  
+  
+  /***********************
+   * Sample dataset
+   ***********************/
+  const sample = {
+    days: (() => {
+      const arr = [];
+      const today = new Date();
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        arr.push(d.toISOString().slice(0,10));
+      }
+      return arr;
+    })(),
+    wasteKg: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    energyKwh: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    tokensIssued: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    comp: {
+      organic: 0,
+      plastic: 0,
+      metal: 0,
+      glass: 0,
+      other: 0
+    },
+    hubs: [],
+    anomalies: [],
+    events: []
+  };
+
+  // Nairobi markers (spread across eastlands to westlands)
+  const claimLocations = [];
+
+
+  document.addEventListener('DOMContentLoaded', (event) => {
+  /***********************
+   * Utility & DOM Setup
+   ***********************/
+    document.getElementById('totalWaste').textContent = sample.wasteKg.reduce((a,b)=>a+b,0) + ' kg';
+    document.getElementById('energyGen').textContent = sample.energyKwh.reduce((a,b)=>a+b,0) + ' kWh';
+    document.getElementById('credits').textContent = Math.round(sample.tokensIssued.reduce((a,b)=>a+b,0) / 10);
+   
+
+    // top table
+    const topTable = document.getElementById('topTable');
+    if (sample.hubs.length === 0) {
+      topTable.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:1.5rem">No hub data available.</td></tr>';
+    } else {
+      sample.hubs.forEach(h => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${h.name}</td><td>${h.kg}</td><td>${h.credits}</td>`;
+        topTable.appendChild(tr);
+      });
+    }
+
+    // anomalies
+    const anomalyList = document.getElementById('anomalyList');
+    if (sample.anomalies.length === 0) {
+      anomalyList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem">No anomalies flagged.</div>';
+    } else {
+      sample.anomalies.forEach(a=>{
+        const div = document.createElement('div');
+        div.style.padding='8px';div.style.marginBottom='8px';div.style.borderRadius='8px';div.style.background='linear-gradient(180deg,#fff,#f7fff9)';
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;"><div><strong>${a.hub}</strong><div class="small">${a.desc}</div></div><div style="text-align:right"><div class="small">${a.date}</div><div style="margin-top:6px"><span class="badge ${a.status==='Fully Occupied'?'Fully Occupied':a.status==='flagged'?'Pre-Occupied':'Empty'}">${a.status.toUpperCase()}</span></div></div></div>`;
+        anomalyList.appendChild(div);
+      });
+    }
+
+  });
+
+  // tx list
+  const txList = document.getElementById('txList');
+  if (sample.events.length === 0) {
+    txList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem">No transactions recorded.</div>';
+  } else {
+    sample.events.forEach(e=>{
+      const d = document.createElement('div');
+      d.style.padding='10px';d.style.borderBottom='1px solid #eef7ef';
+      d.innerHTML = `<div style="display:flex;justify-content:space-between"><div><strong>${e.desc}</strong><div class="small">${e.time}</div></div><div style="font-weight:700;color:${e.amt>0?'#0b6b36':'#8b2a2a'}">${e.amt>0? '+'+e.amt: e.amt}</div></div>`;
+      txList.appendChild(d);
+    });
+  }
+
+  // leaderboard
+  const leaderboard = document.getElementById('leaderboard');
+  if (leaderboard) {
+    leaderboard.innerHTML = '<div style="color:var(--muted);padding:0.5rem 0">No leaderboard entries yet.</div>';
+  }
+
+  /***********************
+   * Charts
+   ***********************/
+  // color palette
+  const palette = {
+    green:'#00A86B', teal:'#1abc9c', amber:'#E6C229', blue:'#2e86de', purple:'#9b59b6',
+    coral:'#FF6B6B', olive:'#8bbf6a', brown:'#5C4033'
+  };
+
+  // Line chart (wasteKg + energyKwh)
+  const lineCtx = document.getElementById('lineChart');
+  const lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+      labels: sample.days,
+      datasets: [
+        { label:'Organic (kg)', data: sample.wasteKg, borderColor: palette.green, backgroundColor: 'rgba(0,168,107,0.08)', tension:0.3, yAxisID:'y1', pointRadius:3 },
+        { label:'E-waste (kg)', data: sample.energyKwh, borderColor: palette.blue, backgroundColor:'rgba(46,134,222,0.08)', tension:0.3, yAxisID:'y2', pointRadius:3 }
+      ]
+    },
+    options: {
+      responsive:true,
+      interaction:{mode:'index',intersect:false},
+      scales: {
+        x: { grid:{display:false} },
+        y1: { type:'linear', position:'left', title:{display:true,text:'kg'}, grid:{color:'rgba(10,40,20,0.03)'} },
+        y2: { type:'linear', position:'right', title:{display:true,text:'kWh'}, grid:{display:false} }
+      },
+      plugins:{legend:{position:'top'}}
+    }
+  });
+
+  // Pie chart (composition)
+  const pieCtx = document.getElementById('pieChart');
+  const pieChart = new Chart(pieCtx, {
+    type:'doughnut',
+    data:{
+      labels: Object.keys(sample.comp).map(k=>k.charAt(0).toUpperCase()+k.slice(1)),
+      datasets:[{
+        data: Object.values(sample.comp),
+        backgroundColor: [palette.green,palette.coral,palette.purple,palette.blue,palette.olive],
+        hoverOffset:8
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+  });
+
+  // Scatter chart (kg vs kWh)
+  // create synthetic drop events by pairing arrays (for demo)
+  const scatterData = sample.wasteKg.map((kg, idx) => ({x:kg, y: sample.energyKwh[idx], r: Math.max(3, Math.round(kg/2))}));
+  const scatterCtx = document.getElementById('scatter');
+  const scatter = new Chart(scatterCtx, {
+    type:'bubble',
+    data:{datasets:[{label:'Drop events',data:scatterData,backgroundColor:'rgba(26,188,156,0.8)'}]},
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{x:{title:{display:true,text:'Weight (kg)'}}, y:{title:{display:true,text:'Energy (kWh)'}}}
+    }
+  });
+
+  // Bar chart (tokens issued)
+  const barCtx = document.getElementById('barChart');
+  const barChart = new Chart(barCtx, {
+    type:'bar',
+    data:{
+      labels: sample.days,
+      datasets:[{
+        label:'ZeroTokens',
+        data: sample.tokensIssued,
+        backgroundColor: sample.tokensIssued.map(v => v>70 ? palette.green : palette.amber),
+        borderRadius:6
+      }]
+    },
+    options:{plugins:{legend:{display:false}},scales:{x:{display:false}}}
+  });
+
+  // Stacked chart (waste by region over weeks - synthetic)
+  const stackedCtx = document.getElementById('stacked');
+  const weeks = ['W1','W2','W3','W4'];
+  const stacked = new Chart(stackedCtx,{
+    type:'bar',
+    data:{
+      labels: weeks,
+      datasets: [
+        {label:'Eastlands', data:[0,0,0,0], backgroundColor:palette.green},
+        {label:'CBD', data:[0,0,0,0], backgroundColor:palette.blue},
+        {label:'Westlands', data:[0,0,0,0], backgroundColor:palette.purple},
+        {label:'Karen', data:[0,0,0,0], backgroundColor:palette.olive}
+      ]
+    },
+    options:{scales:{x:{stacked:true}, y:{stacked:true}}, plugins:{legend:{position:'bottom'}}}
+  });
+
+  // Radar chart (user metrics)
+  const radarCtx = document.getElementById('radar');
+  const radar = new Chart(radarCtx,{
+    type:'radar',
+    data:{
+      labels:['Consistency','Variety','Impact','Redeeming','Engagement'],
+      datasets:[{
+        label:'Your Profile',
+        data:[0,0,0,0,0],
+        backgroundColor:'rgba(0,168,107,0.14)',
+        borderColor:palette.green,
+        pointBackgroundColor:palette.green
+      }]
+    },
+    options:{scales:{r:{beginAtZero:true,max:100}}}
+  });
+
+  /***********************
+   * Map (Leaflet)
+   ***********************/
+  const map = L.map('map', {zoomControl:false}).setView([-1.286389, 36.817223], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+
+  // marker color by status
+  function getColor(status){
+    if(status==='Fully Occupied') return '#ff6b6b';
+    if(status==='Empty') return '#00a86b';
+    if(status==='Pre-Occupied') return '#ffb84d';
+    return '#999';
+  }
+
+  claimLocations.forEach(loc=>{
+    const circle = L.circleMarker([loc.lat, loc.lng], {radius:8, fillColor:getColor(loc.status), color:'#fff', weight:1, fillOpacity:0.9}).addTo(map);
+    circle.bindPopup(`<strong>${loc.neighbourhood}</strong><div class="small">${loc.type}</div><div class="small">Status: ${loc.status}</div><div class="small">Weight: ${loc.weight}</div>`);
+  });
+
+  /***********************
+   * Interactions
+   ***********************/
+  // Export CSV of sample daily series
+  function exportCSV(){
+    const rows = [['date,wasteKg,energyKwh,tokens']];
+    for(let i=0;i<sample.days.length;i++){
+      rows.push(`${sample.days[i]},${sample.wasteKg[i]},${sample.energyKwh[i]},${sample.tokensIssued[i]}`);
+    }
+    const csv = rows.join('\\n');
+    const blob = new Blob([csv],{type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'zerowave-data.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Download charts as PNGs (zip-like zip omitted, download combined canvas)
+  function downloadPNG(){
+    // create combined canvas
+    const canvases = [lineCtx, pieCtx, scatterCtx];
+    const w = 1200;
+    const h = 800;
+    const combined = document.createElement('canvas');
+    combined.width = w; combined.height = h;
+    const ctx = combined.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+    let x=0,y=0;
+    canvases.forEach((c,i)=>{
+      const tmp = document.createElement('canvas');
+      tmp.width = c.width; tmp.height = c.height;
+      tmp.getContext('2d').drawImage(c,0,0);
+      ctx.drawImage(c, x, y, w, Math.round(h/3));
+      y += Math.round(h/3);
+    });
+    const url = combined.toDataURL('image/png');
+    const a = document.createElement('a'); a.href=url; a.download='zerowave-charts.png'; a.click();
+  }
+
+  // simple timeframe filter (for demo, just toggles dataset)
+  function setRange(range){
+    // in real app, request data for range; here simulate by scaling values
+    const mul = (range==='7'?0.5: range==='30'?1.0: range==='90'?1.5: 2.0);
+    const newWaste = sample.wasteKg.map(v=>Math.round(v * mul));
+    const newEnergy = sample.energyKwh.map(v=>Math.round(v * mul));
+    const newTokens = sample.tokensIssued.map(v=>Math.round(v * mul));
+    lineChart.data.datasets[0].data = newWaste;
+    lineChart.data.datasets[1].data = newEnergy;
+    barChart.data.datasets[0].data = newTokens;
+    pieChart.data.datasets[0].data = [Math.round(sample.comp.organic * mul), sample.comp.plastic, sample.comp.metal, sample.comp.glass, sample.comp.other];
+    lineChart.update(); barChart.update(); pieChart.update();
+    
+    // update summary
+    document.getElementById('totalWaste').textContent = newWaste.reduce((a,b)=>a+b,0) + ' kg';
+    document.getElementById('energyGen').textContent = newEnergy.reduce((a,b)=>a+b,0) + ' kWh';
+    document.getElementById('credits').textContent = Math.round(newTokens.reduce((a,b)=>a+b,0) / 10);
+  }
+
+  // minimal search (filter hubs)
+  document.getElementById('q').addEventListener('input', (e)=>{
+    const q = e.target.value.toLowerCase();
+    const rows = topTable.querySelectorAll('tr');
+    rows.forEach(r=>{
+      r.style.display = (q === '' || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+  });
+
+  </script>
+
+</html>

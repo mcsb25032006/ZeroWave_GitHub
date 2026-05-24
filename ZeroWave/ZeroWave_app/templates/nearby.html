@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroWave - Regional Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/allmi css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #8A9A5B;
+            --primary-glow: #A2B570;
+            --bg: #F0F8A4;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --bg: #141811;
+            --card: #1D2219;
+            --text: #E6EAE0;
+            --muted: #9AA38F;
+            --border: #2B3326;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FAFDF3 0%, var(--bg) 100%);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #141811 0%, #1D2219 100%);
+        }
+
+        .main-content {
+            margin-left: 20px;
+            padding: 24px;
+            min-height: 100vh;
+            min-width: 0;
+            width: calc(100% - 260px);
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: var(--muted);
+            margin: 4px 0 0 0;
+        } 
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stat-value.success { color: #10b981; }
+        .stat-value.warning { color: #f59e0b; }
+        .stat-value.danger { color: #ef4444; }
+        .stat-value.primary { color: #8A9A5B; }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            height: 600px;
+        }
+
+        .map-sidebar {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow-y: scroll;
+            color: var(--text);
+        }
+
+        .map-card {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .form-select {
+            border: 1px solid var(--border);
+            background-color: var(--card);
+            color: var(--text);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-color.success { background: #10b981; }
+        .legend-color.warning { background: #f59e0b; }
+        .legend-color.danger { background: #ef4444; }
+
+        .insight-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+        }
+
+        .insight-item.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .insight-item.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .insight-item.primary {
+            background: rgba(138, 154, 91, 0.15);
+            border-color: #8A9A5B;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .insight-desc {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .location-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .location-card {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            transition: background 0.2s ease;
+        }
+
+        .location-card:hover {
+            background: rgba(138, 154, 91, 0.15);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .location-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .location-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .location-details {
+            font-size: 14px;
+        }
+
+        .location-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        .btn-primary {
+            background: #8A9A5B;
+            border-color: #8A9A5B;
+        }
+
+        .btn-outline-primary {
+            color: #8A9A5B;
+            border-color: #8A9A5B;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; }
+            .map-container { grid-template-columns: 1fr; height: auto; }
+            .map-card { height: 400px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    
+{% include 'sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title">Regional Analysis</h1>
+                <p class="page-subtitle">Geographic distribution of waste patterns</p>
+            </div>
+            <div class="d-flex gap-3">
+                <button class="btn btn-outline-primary" id="toggleHeatmap">
+                    <i class="fas fa-layer-group me-2"></i>
+                    Show Heatmap
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Stations</div>
+                <div class="stat-value primary">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Empty</div>
+                <div class="stat-value success">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Almost Full</div>
+                <div class="stat-value warning">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Fully Occupied</div>
+                <div class="stat-value danger">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Weight</div>
+                <div class="stat-value primary">0 Kgs</div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <!-- Map Filters & Insights -->
+            <div class="map-sidebar">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-filter text-primary"></i>
+                        Map Filters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Status Filter</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="Empty">Empty</option>
+                            <option value="Pre-Occupied">Almost Full</option>
+                            <option value="Fully Occupied">Fully Occupied</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Waste Type</label>
+                        <select class="form-select" id="typeFilter">
+                            <option value="all">All Waste</option>
+                            <option value="Empty">Organic</option>
+                            <option value="Home">E-waste</option>
+                            <option value="Home">Recyclables</option>
+                            <option value="Home">Agriculture</option>
+                        </select>
+                    </div>
+
+                    <div class="border-top pt-3 mb-3">
+                        <h6 class="mb-3">Legend</h6>
+                        <div class="legend-item">
+                            <div class="legend-color success"></div>
+                            <span>Empty Stations</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color warning"></div>
+                            <span>Pre-occupied</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color danger"></div>
+                            <span>Fully Occupied</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-shield-alt text-primary"></i>
+                        Regional Insights
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="text-align:center;color:var(--muted);padding:1.5rem">No regional insights.</div>
+                </div>
+            </div>
+
+            <!-- Interactive Map -->
+            <div class="map-card">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Location Details -->
+        <div class="mt-4">
+            <h4 class="mb-3">
+                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                Location Breakdown
+            </h4>
+            <div class="location-grid" id="locationGrid">
+                <!-- Location cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    {% include 'chatbox.html' %}
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Claims data
+        const claimLocations = [];
+
+
+        // Initialize map
+        const map = L.map('map').setView([-1.286389, 36.81667], 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let markers = [];
+        let heatmapVisible = false;
+
+        function getMarkerColor(status) {
+            switch (status) {
+                case 'Empty': return '#10b981';
+                case 'Pre-Occupied': return '#f59e0b';
+                case 'Fully Occupied': return '#ef4444';
+                default: return '#64748b';
+            }
+        }
+
+        function formatCurrency(weight) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(weight);
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'Empty': 'badge-success',
+                'Pre-Occupied': 'badge-warning',
+                'Fully Occupied': 'badge-danger'
+            };
+            return `<span class="badge ${badges[status]}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        }
+
+        function addMarkers(locations) {
+            // Clear existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            locations.forEach(location => {
+                const marker = L.circleMarker([location.lat, location.lng], {
+                    color: getMarkerColor(location.status),
+                    fillColor: getMarkerColor(location.status),
+                    fillOpacity: 0.8,
+                    radius: 8,
+                    weight: 2
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div style="min-width: 250px;">
+                        <h6><strong>${location.city}, ${location.county}</strong></h6>
+                        <p class="mb-1">${location.type} - ${(location.weight)} kgs</p>
+                        <div>${getStatusBadge(location.status)}</div>
+                    </div>
+                `);
+
+                markers.push(marker);
+            });
+        }
+
+        function updateLocationGrid(locations) {
+            const grid = document.getElementById('locationGrid');
+            if (locations.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;color:var(--muted);width:100%;padding:2rem">No stations registered yet.</div>';
+                return;
+            }
+            grid.innerHTML = locations.map(location => `
+                <div class="location-card">
+                    <div class="location-header">
+                        <div class="location-name">${location.city}, ${location.county}</div>
+                        <div class="location-status" style="background-color: ${getMarkerColor(location.status)}"></div>
+                    </div>
+                    <div class="location-details">
+                        <div class="location-row">
+                            <span class="text-muted">Type:</span>
+                            <span>${location.type}</span>
+                        </div>
+                        <div class="location-row">
+                            <span class="text-muted">Weight:</span>
+                            <span><strong>${(location.weight)} kgs</strong></span>
+                        </div>
+                        <div>${getStatusBadge(location.status)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterLocations() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            const filtered = claimLocations.filter(location => {
+                const matchesStatus = statusFilter === 'all' || location.status === statusFilter;
+                const matchesType = typeFilter === 'all' || location.type === typeFilter;
+                return matchesStatus && matchesType;
+            });
+
+            addMarkers(filtered);
+            updateLocationGrid(filtered);
+        }
+
+        // Initialize with all locations
+        addMarkers(claimLocations);
+        updateLocationGrid(claimLocations);
+
+        // Event listeners
+        document.getElementById('statusFilter').addEventListener('change', filterLocations);
+        document.getElementById('typeFilter').addEventListener('change', filterLocations);
+
+        document.getElementById('toggleHeatmap').addEventListener('click', function() {
+            heatmapVisible = !heatmapVisible;
+            this.innerHTML = heatmapVisible ? 
+                '<i class="fas fa-layer-group me-2"></i>Hide Heatmap' : 
+                '<i class="fas fa-layer-group me-2"></i>Show Heatmap';
+            
+            // In a real implementation, you would toggle heatmap layers here
+            if (heatmapVisible) {
+                console.log('Heatmap enabled');
+            } else {
+                console.log('Heatmap disabled');
+            }
+        });
+        // Wait until the DOM is fully loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            const navLinks = document.querySelectorAll(".sidebar .nav-link");
+
+            navLinks.forEach(link => {
+                link.addEventListener("click", function() {
+                    // Remove 'active' from all nav-links
+                    navLinks.forEach(l => l.classList.remove("active"));
+                    
+                    // Add 'active' to the clicked link
+                    this.classList.add("active");
+                });
+            });
+        });
+    </script>
+</body>
+</html>

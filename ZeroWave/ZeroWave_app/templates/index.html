@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZeroWave | Turning Waste Into Energy</title>
+    <meta
+      name="description"
+      content="ZeroWave: Turning waste into energy. Earn ZeroTokens, track impact, and power a greener tomorrow."
+    />
+    <link rel="canonical" href="/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #8A9A5B;
+        --primary-glow: #A2B570;
+        --secondary: #E2725B;
+        --accent: #333333;
+        --bg: #F0F8A4;
+        --text: #333333;
+        --muted: #6E7A5A;
+        --card: #ffffff;
+        --radius: 16px;
+        --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.25);
+        --gradient-primary: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--secondary)
+        );
+        --green-soft: #A2B570;
+        --brown: #5C4033;
+      }
+      [data-theme="dark"] {
+        --bg: #141811;
+        --text: #E6EAE0;
+        --muted: #9AA38F;
+        --card: #1D2219;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          system-ui,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: saturate(180%) blur(10px);
+        border-bottom: 1px solid hsl(210 16% 92%);
+      }
+      [data-theme="dark"] header {
+        background: rgba(20, 24, 28, 0.6);
+        border-color: hsl(210 10% 20%);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 700;
+      }
+      .brand .logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: grid;
+        place-items: center;
+        color: white;
+        box-shadow: var(--shadow);
+      }
+      .nav-links {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+      @media (max-width: 768px) {
+        .nav-links .btn {
+          display: none;
+        }
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        transition:
+          transform 0.2s ease,
+          opacity 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--shadow);
+      }
+      .btn-outline {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: transparent;
+      }
+      .hero {
+        position: relative;
+        padding: 6rem 0 3rem;
+        background:
+          radial-gradient(
+            1200px 500px at 80% -10%,
+            rgba(226, 114, 91, 0.15),
+            transparent 70%
+          ),
+          linear-gradient(180deg, #FAFDF3, #F0F8A4);
+      }
+      [data-theme="dark"] .hero {
+        background:
+          radial-gradient(
+            1200px 500px at 80% -10%,
+            rgba(226, 114, 91, 0.2),
+            transparent 70%
+          ),
+          linear-gradient(180deg, #1A1F16, #252B20);
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+      @media (min-width: 992px) {
+        .hero-grid {
+          grid-template-columns: 1.1fr 0.9fr;
+        }
+      }
+      .headline {
+        font-family: Poppins, Inter, sans-serif;
+        font-size: clamp(2rem, 4.5vw, 3.5rem);
+        font-weight: 700;
+        line-height: 1.1;
+        margin: 0 0 1rem;
+      }
+      .accent {
+        background: linear-gradient(90deg, var(--primary), var(--green-soft));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .sub {
+        font-size: 1.125rem;
+        color: var(--muted);
+        max-width: 52ch;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid hsl(210 16% 92%);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+      }
+      [data-theme="dark"] .card {
+        border-color: hsl(210 10% 20%);
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      @media (min-width: 768px) {
+        .grid-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .section {
+        padding: 3rem 0;
+      }
+      .section h2 {
+        font-family: Poppins, Inter, sans-serif;
+        font-size: 2rem;
+        margin: 0 0 0.75rem;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .stat {
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+      }
+      .stat .value {
+        font-size: 2rem;
+        color: var(--primary);
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 999px;
+        background: hsl(160 70% 95%);
+        color: var(--primary);
+        font-weight: 600;
+      }
+      footer {
+        border-top: 1px solid hsl(210 16% 92%);
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: saturate(180%) blur(10px);
+      }
+      [data-theme="dark"] footer {
+        background: rgba(20, 24, 28, 0.5);
+        border-color: hsl(210 10% 20%);
+      }
+      .footer-wrap {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 2rem 0;
+      }
+      @media (min-width: 768px) {
+        .footer-wrap {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+      .hero-img {
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        animation: float 6s ease-in-out infinite;
+        width: 100%;
+        height: auto;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      .fade-in {
+        animation: fade-in 0.5s ease both;
+      }
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .icon-pill {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: hsl(160 60% 92%);
+        color: var(--primary);
+      }
+      .link {
+        color: var(--primary);
+      }
+      .topbar-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .theme-toggle {
+        border: none;
+        background: transparent;
+        padding: 0.5rem;
+        border-radius: 10px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      .theme-toggle:hover {
+        background: hsl(210 16% 96%);
+      }
+      [data-theme="dark"] .theme-toggle:hover {
+        background: hsl(210 10% 18%);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="/" aria-label="ZeroWave home">
+          <div class="logo"><i class="fa-solid fa-leaf"></i></div>
+          <span>ZeroWave</span>
+        </a>
+        <nav class="nav-links">
+          <!-- <a href="/" class="link">Home</a>
+        <a href="/analytics" class="link">Analytics</a>
+        <a href="/rewards" class="link">Rewards</a>
+        <a href="/impact" class="link">Impact</a>
+        <a href="/settings" class="link">Settings</a> -->
+          <a class="btn btn-outline" href="/signin">Sign In</a>
+          <a class="btn btn-primary" href="/registration">Register</a>
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            aria-label="Toggle theme"
+          >
+            <i class="fa-solid fa-circle-half-stroke"></i>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="fade-in">
+            <span class="badge"
+              ><i class="fa-solid fa-recycle"></i> Sustainable by Design</span
+            >
+            <h1 class="headline">
+              Turning Waste Into Energy.
+              <span class="accent">Powering a Greener Tomorrow.</span>
+            </h1>
+            <p class="sub">
+              Join the sustainability revolution. Transform your waste into
+              valuable energy and earn rewards while saving the planet.
+            </p>
+            <div
+              style="
+                display: flex;
+                gap: 0.75rem;
+                flex-wrap: wrap;
+                margin-top: 1rem;
+              "
+            >
+              <a class="btn btn-primary" href="/registration"
+                >Join ZeroWave <i class="fa-solid fa-arrow-right"></i
+              ></a>
+              <a class="btn btn-outline" href="/signin">Sign In</a>
+            </div>
+          </div>
+          <div class="fade-in" style="animation-delay: 0.1s">
+            <img
+              class="hero-img"
+              src="https://www.esi-africa.com/wp-content/uploads/2018/11/Waste-to-power.jpg"
+              alt="Green energy and sustainability"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div
+            class="fade-in"
+            style="text-align: center; max-width: 70ch; margin: 0 auto 1.5rem"
+          >
+            <h2>How It Works</h2>
+            <p class="muted">
+              Three simple steps to start your journey towards a sustainable
+              future
+            </p>
+          </div>
+          <div class="grid-3">
+            <article class="card fade-in" style="animation-delay: 0ms">
+              <div class="icon-pill">
+                <i class="fa-solid fa-trash-arrow-up"></i>
+              </div>
+              <h3>Collect</h3>
+              <p class="muted">
+                Sort and collect your household waste using our smart bin
+                system.
+              </p>
+            </article>
+            <article class="card fade-in" style="animation-delay: 80ms">
+              <div class="icon-pill"><i class="fa-solid fa-bolt"></i></div>
+              <h3>Earn</h3>
+              <p class="muted">
+                Convert waste into energy and earn ZeroTokens and carbon credits.
+              </p>
+            </article>
+            <article class="card fade-in" style="animation-delay: 160ms">
+              <div class="icon-pill"><i class="fa-solid fa-award"></i></div>
+              <h3>Impact</h3>
+              <p class="muted">
+                Redeem rewards and track your contribution to a greener planet.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <div
+        class="container fade-in"
+        style="animation-delay: 0.1s; margin: 2rem auto; text-align: center"
+      >
+        <img
+          class="img"
+          style="
+            max-width: 100%;
+            height: auto;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+          "
+          src="https://i0.wp.com/www.ecomena.org/wp-content/uploads/2013/12/waste-energy-schematic.jpg"
+          alt="Green energy and sustainability"
+        />
+      </div>
+
+      <section class="section" style="background: rgba(138, 154, 91, 0.15)">
+        <div class="container">
+          <div class="grid-3">
+            <div class="card stat fade-in">
+              <i class="fa-solid fa-cloud" style="color: var(--primary)"></i>
+              <div class="value">2.5M</div>
+              <div class="muted">kg CO₂ Saved</div>
+            </div>
+            <div class="card stat fade-in" style="animation-delay: 80ms">
+              <i class="fa-solid fa-house" style="color: var(--primary)"></i>
+              <div class="value">50K+</div>
+              <div class="muted">Households Impacted</div>
+            </div>
+            <div class="card stat fade-in" style="animation-delay: 160ms">
+              <i class="fa-solid fa-tree" style="color: var(--primary)"></i>
+              <div class="value">1.2M</div>
+              <div class="muted">Trees Equivalent</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div
+            class="fade-in"
+            style="text-align: center; max-width: 70ch; margin: 0 auto 1.5rem"
+          >
+            <h2>What Our Community Says</h2>
+            <p class="muted">
+              Join thousands of eco-warriors making a difference
+            </p>
+          </div>
+          <div class="grid-3">
+            <article class="card fade-in">
+              <h4 style="margin: 0.25rem 0">Sarah Chen</h4>
+              <p class="muted" style="font-style: italic">
+                “ZeroWave transformed how I think about waste. I've earned
+                enough credits to offset my carbon footprint!”
+              </p>
+            </article>
+            <article class="card fade-in" style="animation-delay: 80ms">
+              <h4 style="margin: 0.25rem 0">Michael Rodriguez</h4>
+              <p class="muted" style="font-style: italic">
+                “The gamification aspect is brilliant. My whole family competes
+                to collect the most ZeroTokens.”
+              </p>
+            </article>
+            <article class="card fade-in" style="animation-delay: 160ms">
+              <h4 style="margin: 0.25rem 0">Aisha Patel</h4>
+              <p class="muted" style="font-style: italic">
+                “Finally, a platform that rewards sustainable behavior. The
+                impact tracker keeps me motivated!”
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-wrap">
+        <div>
+          <div class="brand" style="margin-bottom: 0.5rem">
+            <div class="logo"><i class="fa-solid fa-leaf"></i></div>
+            <span>ZeroWave</span>
+          </div>
+          <p class="muted">
+            ZeroWave is your digital sustainability companion—helping you act
+            green, earn rewards, and visualize your eco impact.
+          </p>
+        </div>
+        <div>
+          <nav
+            style="
+              display: flex;
+              gap: 1rem;
+              flex-wrap: wrap;
+              margin-bottom: 1rem;
+            "
+          >
+            <a class="link" href="#">About</a>
+            <a class="link" href="#">Contact</a>
+            <a class="link" href="#">Privacy</a>
+          </nav>
+          <div style="display: flex; gap: 0.75rem">
+            <a class="link" href="#" aria-label="Twitter"
+              ><i class="fa-brands fa-x-twitter"></i
+            ></a>
+            <a class="link" href="#" aria-label="Instagram"
+              ><i class="fa-brands fa-instagram"></i
+            ></a>
+            <a class="link" href="#" aria-label="LinkedIn"
+              ><i class="fa-brands fa-linkedin"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const toggle = document.getElementById("themeToggle");
+      toggle.addEventListener("click", () => {
+        document.documentElement.dataset.theme =
+          document.documentElement.dataset.theme === "dark" ? "" : "dark";
+        localStorage.setItem(
+          "theme",
+          document.documentElement.dataset.theme || "light",
+        );
+      });
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") document.documentElement.dataset.theme = "dark";
+    </script>
+  </body>
+</html>

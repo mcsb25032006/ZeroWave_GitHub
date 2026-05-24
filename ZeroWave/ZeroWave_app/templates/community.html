@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ZeroWave — Community Hub</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* ===== Reset & tokens ===== */
+    :root{
+      --bg: #F0F8A4;
+      --card: #ffffff;
+      --text: #333333;
+      --muted: #6E7A5A;
+      --accent: #8A9A5B;
+      --accent-2: #E2725B;
+      --glass: rgba(255,255,255,0.9);
+      --radius: 12px;
+      --shadow: 0 8px 20px rgba(138,154,91,0.06);
+      --maxw: 1200px;
+      --mono: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --border: #e6f0ea;
+    }
+    [data-theme="dark"]{
+      --bg: #141811;
+      --card: #1D2219;
+      --text: #E6EAE0;
+      --muted: #9AA38F;
+      --accent: #8A9A5B;
+      --accent-2: #E2725B;
+      --glass: rgba(29, 34, 25, 0.9);
+      --shadow: 0 8px 20px rgba(0,0,0,0.4);
+      --border: #2B3326;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:var(--mono);background:linear-gradient(180deg,#FAFDF3,#F0F8A4);color:var(--text)}
+    [data-theme="dark"] html, [data-theme="dark"] body{background:linear-gradient(180deg,#141811,#1D2219)}
+    a{color:inherit}
+    /* ===== Layout ===== */
+    .page{
+      display:flex;
+      min-height:100vh;
+      gap:18px;
+      padding:18px;
+      justify-content:center;
+    }
+    /* If you have a global sidebar, include it in your overall layout.
+       This page reserves space on the left for that sidebar; if you already have a sidebar, remove .local-sidebar. */
+    .local-sidebar{width:240px;background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+    .content{flex:1;max-width:var(--maxw)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-2),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-weight:800}
+    .title h1{margin:0;font-size:20px}
+    .subtitle{color:var(--muted);font-size:13px}
+    /* ===== Controls ===== */
+    .controls{display:flex;gap:10px;align-items:center}
+    input[type="search"], select{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;min-width:180px}
+    button.btn{background:var(--accent);color:white;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+    /* ===== Grid ===== */
+    .top-grid{display:grid;grid-template-columns:1fr 420px;gap:16px}
+    .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+    .map{height:420px;border-radius:10px;overflow:hidden}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{flex:1;min-width:120px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#f7fff9,#ffffff);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+    .stat .label{font-size:12px;color:var(--muted)}
+    .stat .num{font-weight:800;font-size:18px;margin-top:6px}
+    /* ===== Community list ===== */
+    .panel{margin-top:16px}
+    .list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+    .community{
+      display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#f9fffa);
+      border:1px solid #e7f6ee;
+    }
+    .community .meta{display:flex;align-items:center;gap:10px;justify-content:space-between}
+    .community h3{margin:0;font-size:16px}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{padding:6px 8px;border-radius:8px;background:#eafaf0;color:#0b5b3a;font-size:12px;font-weight:700}
+    .muted{color:var(--muted);font-size:13px}
+    .row{display:flex;gap:8px;align-items:center}
+    .lead-badge{background:#e6fff2;color:#0d6b3f;padding:6px 8px;border-radius:8px;font-weight:700}
+    .btn-group{display:flex;gap:8px}
+    .small{font-size:13px;color:var(--muted)}
+    /* ===== Marketplace ===== */
+    .market{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+    .card-center{text-align:center}
+    .market .item{background:linear-gradient(180deg,#f7fff9,#fff);padding:12px;border-radius:10px;border:1px solid #e7f6ee}
+    .item h4{margin:6px 0 0}
+    .price{font-weight:800;color:#0b6b36;margin-top:8px}
+    /* ===== Modals & panes ===== */
+    .overlay{position:fixed;inset:0;background:rgba(4,10,8,0.36);display:none;align-items:center;justify-content:center;z-index:99}
+    .modal{width:720px;max-width:95%;background:white;border-radius:12px;padding:18px}
+    
+    [data-theme="dark"] .stat {
+      background: var(--card);
+      box-shadow: none;
+    }
+    [data-theme="dark"] .community {
+      background: var(--card);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .market .item {
+      background: var(--card);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .modal {
+      background: var(--card);
+      color: var(--text);
+    }
+    [data-theme="dark"] .price {
+      color: var(--primary-glow);
+    }
+    [data-theme="dark"] .tag {
+      background: #2b3326;
+      color: var(--text);
+    }
+    .modal-header{display:flex;justify-content:space-between;align-items:center}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    /* ===== Responsive ===== */
+    @media(max-width:980px){
+      .top-grid{grid-template-columns:1fr}
+      .map{height:300px}
+      .local-sidebar{display:none}
+    }
+
+    /* Leaderboard container */
+    #leaderboard {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 10px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Each leaderboard entry */
+    #leaderboard li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid #eef2f3;
+      font-size: 0.95rem;
+      color: #2b2b2b;
+      transition: background 0.25s ease, transform 0.2s ease;
+    }
+
+    /* Remove border for last item */
+    #leaderboard li:last-child {
+      border-bottom: none;
+    }
+
+    /* Rank highlighting colors (optional) */
+    #leaderboard li:nth-child(1) {
+      background: linear-gradient(90deg, #00a86b1a, #ffffff);
+      font-weight: 600;
+      color: #008f5a;
+    }
+    #leaderboard li:nth-child(2) {
+      background: linear-gradient(90deg, #e6c2291a, #ffffff);
+      font-weight: 600;
+      color: #b8860b;
+    }
+    #leaderboard li:nth-child(3) {
+      background: linear-gradient(90deg, #ff6b6b1a, #ffffff);
+      font-weight: 600;
+      color: #c0392b;
+    }
+
+    /* Hover effect */
+    #leaderboard li:hover {
+      background: #f5fdf8;
+      transform: translateX(3px);
+    }
+
+    /* Optional: Add small rank numbers beside names */
+    #leaderboard li::before {
+      counter-increment: rank;
+      content: counter(rank) ". ";
+      font-weight: 600;
+      color: #00a86b;
+      margin-right: 8px;
+    }
+    #leaderboard {
+      counter-reset: rank;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page" role="application">
+    
+    {% include 'sidebar.html' %}
+
+    <main class="content" role="main">
+      <header>
+        <div class="brand">
+          <div class="logo">ZW</div>
+          <div class="title">
+            <h1>Community Hub</h1>
+            <div class="subtitle">Connect, lead, verify and trade carbon credits</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <input id="search" type="search" placeholder="Search communities, leads, tags..." aria-label="Search">
+          <select id="region">
+            <option value="all">All regions</option>
+            <option value="eastlands">Eastlands</option>
+            <option value="cbd">CBD</option>
+            <option value="westlands">Westlands</option>
+            <option value="karen">Karen</option>
+            <option value="rongai">Rongai</option>
+          </select>
+          <select id="category">
+            <option value="all">All categories</option>
+            <option value="recycling">Recycling</option>
+            <option value="reforestation">Reforestation</option>
+            <option value="energy">Renewable energy</option>
+            <option value="education">Education</option>
+          </select>
+          <button class="btn" id="createCommunityBtn"><i class="fa-solid fa-plus"></i>&nbsp;Create Community</button>
+        </div>
+      </header>
+
+      <section class="top-grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <div class="small">Active communities</div>
+              <div style="font-weight:800;font-size:20px" id="activeCount">0</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Total impact points</div>
+              <div style="font-weight:800;font-size:20px" id="impactPoints">0</div>
+            </div>
+          </div>
+
+          <div class="stats" aria-hidden="false">
+            <div class="stat"><div class="label">Total waste diverted</div><div class="num" id="divertedKg">0 kg</div></div>
+            <div class="stat"><div class="label">Energy generated</div><div class="num" id="energyKwh">0 kWh</div></div>
+            <div class="stat"><div class="label">Carbon credits</div><div class="num" id="creditsCount">0</div></div>
+          </div>
+
+          <div style="margin-top:12px" class="muted">Tip: Click a community on the map or list to open its detailed panel and join, apply to lead, or view analytics.</div>
+        </div>
+
+        <aside class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Your balance</div>
+              <div style="font-weight:800;font-size:18px" id="userTokens">0 ZeroTokens</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Your role</div>
+              <div style="font-weight:800" id="userRole">Member</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="small">Quick actions</div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="ghost" id="openMarketplace">Marketplace</button>
+              <button class="ghost" id="openEvents">Events</button>
+              <button class="ghost" id="openFeed">Feed</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="small">Leaderboard</div>
+            <ol id="leaderboard" style="padding-left:18px;margin-top:8px"></ol>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel">
+        <div class="card">
+          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+            <div><h3 style="margin:0">Map — communities & impact</h3><div class="small">Filter by region/category or search</div></div>
+            <div class="small">Legend: <span style="display:inline-block;width:10px;height:10px;background:#00A86B;border-radius:2px;margin:0 6px"></span> Verified &nbsp; <span style="display:inline-block;width:10px;height:10px;background:#ff6b6b;border-radius:2px;margin:0 6px"></span> Needs review</div>
+          </div>
+          <div id="map" class="map" aria-hidden="false"></div>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="margin:0">Communities</h3>
+            <div><span class="small">Sort:</span>
+              <select id="sortBy">
+                <option value="impact">Impact</option>
+                <option value="members">Members</option>
+                <option value="new">Newest</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" id="communityList" class="list" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="card">
+          <h3 style="margin:0 0 10px">Carbon Credit Marketplace</h3>
+          <div class="market">
+            <div class="item card-center">
+              <h4>Buy Verified Credits</h4>
+              <div class="price">40 KES / credit</div>
+              <div class="small" style="margin-top:6px">Sourced from reforestation & compost projects</div>
+              <div style="margin-top:12px"><input id="buyAmount" type="number" min="1" placeholder="Credits to buy" style="padding:8px;border-radius:8px;border:1px solid #e6f0ea;width:140px"/> <button class="btn" id="buyBtn">Buy</button></div>
+            </div>
+            <div class="item card-center">
+              <h4>Sell Credits</h4>
+              <div class="price">Listing marketplace</div>
+              <div class="small" style="margin-top:6px">List credits from your community</div>
+              <div style="margin-top:12px"><input id="sellAmount" type="number" min="1" placeholder="Credits to sell" style="padding:8px;border-radius:8px;border:1px solid #e6f0ea;width:140px"/> <button class="btn" id="sellBtn">List</button></div>
+            </div>
+            <div class="item card-center">
+              <h4>Your Orders</h4>
+              <div id="orders" class="small" style="margin-top:8px">No orders yet</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Community detail pane (hidden until selected) -->
+      <aside id="detailPane" class="card" style="margin-top:16px;display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h3 id="detailName" style="margin:0">Community name</h3>
+            <div class="small" id="detailTagline">Tagline / location</div>
+          </div>
+          <div class="row">
+            <div id="leadBadge" class="lead-badge" style="display:none">Lead applied</div>
+            <div class="btn-group">
+              <button class="btn" id="joinBtn">Join</button>
+              <button class="ghost" id="followBtn">Follow</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div style="flex:1">
+            <div class="small">About</div>
+            <p id="detailDesc">Description here</p>
+
+            <div style="margin-top:8px">
+              <div class="small">Impact</div>
+              <ul id="detailImpact" class="small"></ul>
+            </div>
+
+            <div style="margin-top:8px">
+              <div class="small">Upcoming Events</div>
+              <ul id="detailEvents" class="small"></ul>
+            </div>
+          </div>
+
+          <div style="width:300px">
+            <div class="small">Members</div>
+            <ul id="membersList" class="small"></ul>
+
+            <div style="margin-top:12px">
+              <div class="small">Community analytics</div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <div style="flex:1;background:#f7fff9;padding:10px;border-radius:8px;text-align:center">
+                  <div class="small">Points</div><div id="commPoints" style="font-weight:800">0</div>
+                </div>
+                <div style="flex:1;background:#fff8f2;padding:10px;border-radius:8px;text-align:center">
+                  <div class="small">Credits</div><div id="commCredits" style="font-weight:800">0</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <button class="ghost" id="applyLeadBtn" style="background-color:#00A86B">Apply to be Community Lead</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </main>
+  </div>
+
+  <!-- Modal overlay (create community / messages) -->
+  <div id="overlay" class="overlay" style="display:none;align-items:center;justify-content:center">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="modalTitle">Create Community</h3>
+        <button onclick="closeModal()" class="ghost">Close</button>
+      </div>
+      <div style="margin-top:10px">
+        <div class="grid-2">
+          <div>
+            <label class="small">Name</label>
+            <input id="cName" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e6f0ea" />
+          </div>
+          <div>
+            <label class="small">Region</label>
+            <select id="cRegion" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e6f0ea">
+              <option value="cbd">CBD</option><option value="westlands">Westlands</option><option value="karen">Karen</option><option value="eastlands">Eastlands</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <label class="small">Category</label>
+          <select id="cCat" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e6f0ea">
+            <option value="recycling">Recycling</option><option value="reforestation">Reforestation</option><option value="energy">Energy</option>
+          </select>
+        </div>
+        <div style="margin-top:10px">
+          <label class="small">Short description</label>
+          <textarea id="cDesc" rows="4" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e6f0ea"></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+          <button class="ghost" onclick="closeModal()">Cancel</button>
+          <button class="btn" onclick="createCommunity()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include 'chatbox.html' %}
+
+  <!-- Dependencies -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+  /**********************
+   * Simulated datastore (could be replaced by API calls)
+   **********************/
+  const STORAGE_KEY = 'zerowave_communities_v2';
+  let user = { id: 'u001', name: 'You', tokens: 0, role: 'Member', following: [], joined: [] };
+
+  // initial communities sample
+  const seed = [];
+
+
+  function loadData(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+    return seed.slice();
+  }
+  let communities = loadData();
+
+  /**********************
+   * Map & markers
+   **********************/
+  const map = L.map('map',{zoomControl:true}).setView([-1.286389,36.817223],11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+  let markers = {}; // id -> marker
+
+  function renderMarkers(filterRegion='all', filterCat='all', q=''){
+    // clear markers
+    Object.values(markers).forEach(m=>map.removeLayer(m));
+    markers = {};
+    communities.forEach(c=>{
+      if(filterRegion!=='all' && c.region !== filterRegion) return;
+      if(filterCat!=='all' && c.category !== filterCat) return;
+      if(q && !(c.name.toLowerCase().includes(q) || (c.tagline||'').toLowerCase().includes(q) || (c.desc||'').toLowerCase().includes(q))) return;
+
+      const color = c.verified ? '#00A86B' : '#FF6B6B';
+      const m = L.circleMarker([c.lat,c.lng], {radius:8,fillColor:color,color:'#fff',weight:1,fillOpacity:0.95}).addTo(map);
+      m.bindPopup(generatePopupHTML(c), {maxWidth:320});
+      m.on('click', ()=> showDetail(c.id));
+      markers[c.id] = m;
+    });
+  }
+
+  function generatePopupHTML(c){
+    return `<div style="font-weight:800">${escapeHtml(c.name)} ${c.verified?'<span style="color:#0b6b36;font-weight:700"> ● Verified</span>':''}</div>
+            <div style="margin-top:6px;font-size:13px">${escapeHtml(c.tagline)}</div>
+            <div style="margin-top:8px;font-size:13px"><strong>Impact:</strong> ${escapeHtml((c.impact||[]).slice(0,2).join(' • '))}</div>
+            <div style="margin-top:8px;font-size:13px"><strong>Members:</strong> ${c.members} • <strong>Credits:</strong> ${c.credits}</div>
+            <div style="margin-top:8px"><button onclick="showDetail('${c.id}')" style="background:var(--accent);color:#fff;padding:8px 10px;border-radius:8px;border:0;cursor:pointer">View</button></div>`;
+  }
+
+  /**********************
+   * Render community list and stats
+   **********************/
+  function renderList(sort='impact', region='all', category='all', q=''){
+    const container = document.getElementById('communityList');
+    container.innerHTML = '';
+    let list = communities.slice();
+
+    // filters
+    if(region !== 'all') list = list.filter(c=>c.region===region);
+    if(category !== 'all') list = list.filter(c=>c.category===category);
+    if(q) list = list.filter(c=> (c.name+c.tagline+c.desc).toLowerCase().includes(q.toLowerCase()));
+
+    // sort
+    if(sort==='impact') list.sort((a,b)=>b.points - a.points);
+    if(sort==='members') list.sort((a,b)=>b.members - a.members);
+    if(sort==='new') list.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+
+    // update counters
+    document.getElementById('activeCount').textContent = list.length;
+    document.getElementById('impactPoints').textContent = list.reduce((s,c)=>s+c.points,0);
+
+    // totals
+    document.getElementById('divertedKg').textContent = (list.reduce((s,c)=>s + (c.divertedKg||0),0) || 0) + ' kg';
+    document.getElementById('energyKwh').textContent = (list.reduce((s,c)=>s + (c.energyKwh||0),0) || 0) + ' kWh';
+    document.getElementById('creditsCount').textContent = list.reduce((s,c)=>s + (c.credits||0),0);
+
+    // render items
+    if (list.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:var(--muted);width:100%;padding:2rem">No communities found. Click "Create Community" to build one!</div>';
+    } else {
+      list.forEach(c=>{
+        const el = document.createElement('div');
+        el.className = 'community';
+        el.innerHTML = `
+          <div class="meta">
+            <div>
+              <h3>${escapeHtml(c.name)} ${c.verified?'<span class="lead-badge" style="display:inline-block;margin-left:8px">Verified</span>':''}</h3>
+              <div class="small">${escapeHtml(c.tagline)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Members</div>
+              <div style="font-weight:800">${c.members}</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1"><div class="small">${escapeHtml(c.desc)}</div></div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="tags"><div class="tag">${escapeHtml(c.category)}</div><div class="tag">${escapeHtml(c.region)}</div></div>
+            <div class="btn-group">
+              <button class="btn" onclick="showDetail('${c.id}')">Open</button>
+              <button class="ghost" onclick="toggleJoin('${c.id}', this)">${user.joined.includes(c.id)?'Leave':'Join'}</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    // leaderboard
+    const lb = document.getElementById('leaderboard'); lb.innerHTML = '';
+    const top = communities.slice().sort((a,b)=>b.points - a.points).slice(0,5);
+    if (top.length === 0) {
+      lb.innerHTML = '<div style="color:var(--muted);padding:0.5rem 0">No entries yet.</div>';
+    } else {
+      top.forEach((t,i)=> {
+        const li = document.createElement('li'); li.textContent = `${t.name} — ${t.points} pts`; lb.appendChild(li);
+      });
+    }
+  }
+
+  /**********************
+   * Detail pane
+   **********************/
+  function showDetail(id){
+    const c = communities.find(x=>x.id===id);
+    if(!c) return;
+    document.getElementById('detailPane').style.display = 'block';
+    document.getElementById('detailName').textContent = c.name;
+    document.getElementById('detailTagline').textContent = `${capitalize(c.region)} • ${capitalize(c.category)}`;
+    document.getElementById('detailDesc').textContent = c.desc;
+    document.getElementById('commPoints').textContent = c.points;
+    document.getElementById('commCredits').textContent = c.credits;
+    document.getElementById('membersList').innerHTML = c.membersList ? c.membersList.map(m=>`<li>${escapeHtml(m)}</li>`).join('') : '<li>Loading members...</li>';
+    document.getElementById('detailImpact').innerHTML = (c.impact||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
+    document.getElementById('detailEvents').innerHTML = (c.events||[]).map(e=>`<li>${escapeHtml(e.title)} — ${escapeHtml(e.date)}</li>`).join('');
+
+    // buttons
+    document.getElementById('joinBtn').textContent = user.joined.includes(id) ? 'Leave' : 'Join';
+    document.getElementById('followBtn').textContent = user.following.includes(id) ? 'Unfollow' : 'Follow';
+
+    // show lead badge if applied
+    document.getElementById('leadBadge').style.display = c.leadApplicant? 'inline-block':'none';
+    // set handlers
+    document.getElementById('joinBtn').onclick = ()=> toggleJoin(id);
+    document.getElementById('followBtn').onclick = ()=> toggleFollow(id);
+    document.getElementById('applyLeadBtn').onclick = ()=> applyToLead(id);
+    // center map
+    map.setView([c.lat,c.lng],13,{animate:true});
+  }
+
+  function toggleJoin(id, btnEl){
+    if(user.joined.includes(id)){
+      user.joined = user.joined.filter(x=>x!==id);
+      // update members count
+      const c = communities.find(x=>x.id===id); c.members = Math.max(0, (c.members||1)-1);
+    } else {
+      user.joined.push(id);
+      const c = communities.find(x=>x.id===id); c.members = (c.members||0)+1;
+    }
+    persist();
+    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+    if(btnEl) btnEl.textContent = user.joined.includes(id)?'Leave':'Join';
+    // update detail if open
+    if(document.getElementById('detailPane').style.display !== 'none'){
+      showDetail(id);
+    }
+  }
+
+  function toggleFollow(id){
+    if(user.following.includes(id)) user.following = user.following.filter(x=>x!==id);
+    else user.following.push(id);
+    persist();
+    showDetail(id);
+  }
+
+  function applyToLead(id){
+    const c = communities.find(x=>x.id===id);
+    if(!c) return;
+    // simulate application approval flow: store applicant flag
+    c.leadApplicant = {userId:user.id, when: new Date().toISOString()};
+    persist();
+    alert('Application submitted. Community admins will review your application.');
+    showDetail(id);
+  }
+
+  /**********************
+   * Marketplace actions
+   **********************/
+  let orders = [];
+  function buyCredits(){
+    const n = Number(document.getElementById('buyAmount').value || 0);
+    if(!n || n <= 0){ alert('Enter a positive credit amount'); return; }
+    const cost = n * 40; // KES per credit
+    if(!confirm(`Buy ${n} credits for KES ${cost}?`)) return;
+    user.tokens += n;
+    orders.push({id:'o'+Date.now(), type:'buy', amount:n, cost:cost, when: new Date().toISOString()});
+    persist();
+    renderOrders();
+    alert('Purchase successful — tokens added to your balance.');
+  }
+  function sellCredits(){
+    const n = Number(document.getElementById('sellAmount').value || 0);
+    if(!n || n <= 0){ alert('Enter a positive credit amount'); return; }
+    if(user.tokens < n){ alert('Not enough tokens'); return; }
+    const price = n * 35; // marketplace price
+    if(!confirm(`List ${n} credits for sale at KES ${price}?`)) return;
+    user.tokens -= n;
+    orders.push({id:'o'+Date.now(), type:'sell', amount:n, price:price, when: new Date().toISOString()});
+    persist();
+    renderOrders();
+    alert('Credits listed for sale (simulated).');
+  }
+
+  function renderOrders(){
+    const el = document.getElementById('orders');
+    if(orders.length===0){ el.textContent = 'No orders yet'; return; }
+    el.innerHTML = orders.map(o=>`${o.type.toUpperCase()} • ${o.amount} credits • ${o.cost?o.cost:o.price || ''} KES`).join('<br>');
+  }
+
+  /**********************
+   * Create community modal
+   **********************/
+  const overlay = document.getElementById('overlay');
+  document.getElementById('createCommunityBtn').addEventListener('click', openCreate);
+  function openCreate(){
+    document.getElementById('modalTitle').textContent = 'Create Community';
+    overlay.style.display='flex';
+  }
+  function closeModal(){ overlay.style.display='none'; }
+  function createCommunity(){
+    const name = document.getElementById('cName').value.trim();
+    const region = document.getElementById('cRegion').value;
+    const category = document.getElementById('cCat').value;
+    const desc = document.getElementById('cDesc').value.trim();
+    if(!name || !desc){ alert('Name and description required'); return; }
+    const id = 'c'+Date.now();
+    const lat = map.getCenter().lat + (Math.random()-0.5)/50;
+    const lng = map.getCenter().lng + (Math.random()-0.5)/50;
+    const newC = { id, name, region, category, lat, lng, tagline: desc.slice(0,60), desc, verified:false, members:1, points:0, credits:0, impact:[], events:[], membersList:[user.name] };
+    communities.push(newC);
+    persist();
+    renderMarkers(document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+    closeModal();
+    alert('Community created — waiting verification.');
+  }
+
+  /**********************
+   * Helpers & persistence
+   **********************/
+  function persist(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(communities));
+    localStorage.setItem('zerowave_user', JSON.stringify(user));
+  }
+  function restoreUser(){
+    const raw = localStorage.getItem('zerowave_user');
+    if(raw) user = JSON.parse(raw);
+  }
+
+  function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function capitalize(s){ if(!s) return ''; return s.charAt(0).toUpperCase()+s.slice(1); }
+
+  /**********************
+   * UI wiring
+   **********************/
+  document.getElementById('search').addEventListener('input', ()=> {
+    const q = document.getElementById('search').value;
+    renderMarkers(document.getElementById('region').value, document.getElementById('category').value, q);
+    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, q);
+  });
+  document.getElementById('region').addEventListener('change', ()=> {
+    renderMarkers(document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+  });
+  document.getElementById('category').addEventListener('change', ()=> {
+    renderMarkers(document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+  });
+  document.getElementById('sortBy').addEventListener('change', ()=> renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value));
+
+  document.getElementById('buyBtn').addEventListener('click', buyCredits);
+  document.getElementById('sellBtn').addEventListener('click', sellCredits);
+  document.getElementById('openMarketplace').addEventListener('click', ()=> window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}));
+  document.getElementById('openEvents').addEventListener('click', ()=> alert('Events panel (demo)'));
+  document.getElementById('openFeed').addEventListener('click', ()=> alert('Feed panel (demo)'));
+
+  // restore + initial render
+  restoreUser();
+  renderMarkers();
+  renderList();
+  renderOrders();
+  // set user tokens display
+  document.getElementById('userTokens').textContent = user.tokens + ' ZeroTokens';
+  document.getElementById('userRole').textContent = user.role;
+
+  // expose some functions for popup buttons
+  window.showDetail = showDetail;
+  window.toggleJoin = toggleJoin;
+  window.toggleFollow = toggleFollow;
+  window.applyToLead = applyToLead;
+  window.openCreate = openCreate;
+  window.closeModal = closeModal;
+  window.createCommunity = createCommunity;
+
+  </script>
+</body>
+</html>

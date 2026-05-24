@@ -1,0 +1,107 @@
+
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impact | ZeroWave</title>
+  <meta name="description" content="Your overall contribution to the planet with community leaderboard and inspiring quote." />
+  <link rel="canonical" href="./impact.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+  <style>
+    :root{
+      --primary: #8A9A5B;
+      --primary-glow: #A2B570;
+      --secondary: #E2725B;
+      --accent: #333333;
+      --bg: #F0F8A4;
+      --text: #333333;
+      --muted: #6E7A5A;
+      --card: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --border: hsl(210 16% 92%);
+      --card-gradient-map: radial-gradient(500px 200px at 50% 30%, rgba(138, 154, 91, 0.15), transparent), linear-gradient(180deg,#fff,rgba(138, 154, 91, 0.1));
+      --map-placeholder: linear-gradient(135deg,rgba(138, 154, 91, 0.15),#fff);
+    }
+    [data-theme="dark"]{
+      --bg: #141811;
+      --text: #E6EAE0;
+      --muted: #9AA38F;
+      --card: #1D2219;
+      --border: #2B3326;
+      --card-gradient-map: radial-gradient(500px 200px at 50% 30%, rgba(138, 154, 91, 0.15), transparent), linear-gradient(180deg,#1D2219,rgba(138, 154, 91, 0.05));
+      --map-placeholder: linear-gradient(135deg,rgba(138, 154, 91, 0.15),#141811);
+    }
+    
+    [data-theme="dark"] body {
+      background: var(--bg);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex}
+    .sidebar{width:260px;min-height:100vh;border-right:1px solid var(--border);background:rgba(255,255,255,.6);backdrop-filter:saturate(180%) blur(8px);position:sticky;top:0}
+    [data-theme="dark"] .sidebar{background:rgba(20,24,28,.5);border-color:var(--border)}
+    .brand{display:flex;align-items:center;gap:.6rem;padding:1rem}
+    .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-glow));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow)}
+    .menu{padding:.5rem}
+    .menu a{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:12px;color:inherit}
+    .menu a:hover,.menu a[aria-current="page"]{background:hsl(160 70% 95%)}
+    [data-theme="dark"] .menu a:hover,[data-theme="dark"] .menu a[aria-current="page"]{background:hsl(210 10% 18%)}
+    .main{flex:1;display:flex;flex-direction:column;min-width:0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
+    .muted{color:var(--muted)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1rem;box-shadow:var(--shadow)}
+    .grid{display:grid;gap:1rem}
+    @media(min-width:900px){.grid-2{grid-template-columns:2fr 1fr}}
+  </style>
+</head>
+<body>
+
+  {% include 'sidebar.html' %}
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 style="margin:0;font-family:Poppins,Inter,sans-serif">Your Impact</h1>
+        <p class="muted" style="margin:.25rem 0 0">Visualize your contribution and see how the community performs</p>
+      </div>
+      <button id="themeToggle" class="card" style="padding:.5rem .8rem;border:0" aria-label="Toggle theme">🌓</button>
+    </div>
+
+    <main style="padding:1.25rem;">
+      <section class="grid grid-2">
+        <div class="card" style="min-height:320px;background:var(--card-gradient-map)">
+          <h2 style="margin-top:0">Global Impact Map</h2>
+          <p class="muted">Regions where your activities contribute to CO₂ reduction</p>
+          <div style="height:220px;border-radius:12px;background:var(--map-placeholder);display:grid;place-items:center;color:var(--muted)">[ Map Visualization Placeholder ]</div>
+        </div>
+        <div class="card">
+          <h2 style="margin-top:0">Community Leaderboard</h2>
+          <ol style="margin:0;padding-left:1.1rem">
+            <li><strong>Sarah Chen</strong> — 2,950 pts</li>
+            <li><strong>Michael Rodriguez</strong> — 2,730 pts</li>
+            <li><strong>You</strong> — 2,610 pts</li>
+            <li><strong>Aisha Patel</strong> — 2,480 pts</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:1rem;text-align:center">
+        <blockquote style="font-family:Poppins,Inter,sans-serif;font-size:1.25rem;margin:0">“Small actions multiplied by millions of people can transform the world.”</blockquote>
+      </section>
+    </main>
+  </div>
+  <script>
+    const t=document.getElementById('themeToggle');
+    t.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
+    if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';
+  </script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+
+
+{% load static %}
+   
+
+
+<style>
+
+
+
+
+/* Chatbot CSS */
+
+.chatbot-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.chatbot-trigger {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8A9A5B 0%, #8A9A5B 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 4px 20px rgba(138, 154, 91, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-trigger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(138, 154, 91, 0.4);
+}
+
+.chatbot-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chatbot-window.show {
+    display: flex;
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, #8A9A5B 0%, #8A9A5B 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+}
+
+.chatbot-info {
+    display: flex;
+    align-items: center;
+}
+
+
+.chatbot-title {
+    font-weight: 900;
+    flex: 1;
+}
+
+.chatbot-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.chatbot-close:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.chatbot-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+.chat-message {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.chat-message.user {
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* .bot-avatar {
+    background: linear-gradient(135deg, #00C2A8 0%, #00C2A8 100%);
+} */
+
+.user-avatar {
+    background: #8A9A5B;
+}
+
+.message-content {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 15px;
+    max-width: 70%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chat-message.user .message-content {
+    background: linear-gradient(135deg, #8A9A5B 0%, #8A9A5B 100%);
+    color: white;
+}
+
+.chatbot-input {
+    padding: 20px;
+    border-top: 1px solid #e1e8ed;
+    background: white;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e1e8ed;
+    border-radius: 25px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.chat-input:focus {
+    border-color: var(--primary);
+}
+
+.send-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8A9A5B 0%, #8A9A5B 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.send-btn:hover {
+    transform: scale(1.1);
+}
+
+.chatbot-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 0.8rem;
+    /* border: 2px solid #fff; */
+}
+
+.chatbot-name {
+    font-weight: bold;
+    font-size: 1rem;
+    color: white;
+}
+
+.chatbot-subtitle {
+    font-size: 0.85rem;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] .chatbot-window {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+[data-theme="dark"] .chatbot-body {
+    background: var(--bg);
+}
+
+[data-theme="dark"] .message-content {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .chatbot-input {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+}
+
+[data-theme="dark"] .chat-input {
+    border-color: var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
+
+[data-theme="dark"] .chat-input:focus {
+    border-color: var(--primary);
+}
+</style>
+
+<!-- Floating Chatbot -->
+    <div class="chatbot-container">
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-info">
+                    <!-- <i class="fas fa-leaf"></i> -->
+                    <img src="https://monkedo-static.s3.eu-central-1.amazonaws.com/component-icons/supabase.png" alt="ZeroWave Avatar"  class="chatbot-avatar">
+                    <div class="chatbot-text">
+                        <div class="chatbot-name">ZeroWave</div>
+                        <div class="chatbot-subtitle">Turning Waste into Power</div>
+                    </div>
+                </div>
+                <button class="chatbot-close" onclick="toggleChatbot()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chatbot-body" id="chatbotBody">
+                <div class="chat-message">
+                    <div class="message-avatar bot-avatar">
+                        <!-- <i class="fas fa-leaf-alt"></i> -->
+                        <img src="https://monkedo-static.s3.eu-central-1.amazonaws.com/component-icons/supabase.png" alt="ZeroWave Logo"  
+                    style="height: 30px;">
+                    </div>
+                    <div class="message-content">
+                        How may I help you?
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <div class="input-group">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type your message...">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button class="chatbot-trigger" type="button" title="Open Chatbot" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        // Chatbot functionality
+        function toggleChatbot() {
+            const chatbotWindow = document.getElementById('chatbotWindow');
+            chatbotWindow.classList.toggle('show');
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const chatbotBody = document.getElementById('chatbotBody');
+            const message = chatInput.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chat-message user';
+            userMessage.innerHTML = `
+                <div class="message-avatar user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="message-content">${message}</div>
+            `;
+            chatbotBody.appendChild(userMessage);
+            chatInput.value = '';
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+            // Loading Indicator
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'chat-message bot typing';
+            loadingMessage.innerHTML = `
+                <div class="message-avatar bot-avatar">
+                    <img src="https://monkedo-static.s3.eu-central-1.amazonaws.com/component-icons/supabase.png" alt="ZeroWave Logo" 
+                    style="height: 30px;">
+                </div>
+                <div class="message-content">...</div>
+            `;
+            chatbotBody.appendChild(loadingMessage);
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+            // Send to Django
+            fetch('/chatbot-response/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatbotBody.removeChild(loadingMessage);
+
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chat-message';
+                botMessage.innerHTML = `
+                    <div class="message-avatar bot-avatar">
+                        <img src="https://monkedo-static.s3.eu-central-1.amazonaws.com/component-icons/supabase.png" alt="ZeroWave Logo"  
+                    style="height: 30px;">
+                    </div>
+                    <div class="message-content">${data.response}</div>
+                `;
+                chatbotBody.appendChild(botMessage);
+                chatbotBody.scrollTop = chatbotBody.scrollHeight;
+            })
+            .catch(error => {
+                chatbotBody.removeChild(loadingMessage);
+                console.error('Error:', error);
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const trimmed = cookie.trim();
+                    if (trimmed.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Enter key support for chat
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>

@@ -1,0 +1,156 @@
+  
+
+
+<style>
+
+/* :root {
+    --primary: #056D5F;
+    --secondary: #0B2545;
+    --accent: #FFD166;
+    --bg: #F6FAF8;
+    --card: #FFFFFF;
+    --text: #0B2545;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+} */
+
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    left: 0;
+    top: 0;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+@media (min-width: 901px) {
+    .main, .main-content, .content {
+        margin-left: 260px !important;
+    }
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo i {
+    color: var(--primary);
+    font-size: 1.75rem;
+}
+
+.sidebar-logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.nav-menu {
+    list-style: none;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+nav-link:active {
+    background-color: #056D5F;
+    color: #fff;
+}
+
+
+</style>
+
+
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <i class="fas fa-leaf"></i>
+        <h1>ZeroWave</h1>
+    </div>
+    <nav>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/dashboard" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="/rewards" class="nav-link">
+                    <i class="fas fa-gift"></i>
+                    <span>Zero Tokens</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="/analytics" class="nav-link">
+                    <i class="fas fa-magnifying-glass-chart"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="/nearby" class="nav-link">
+                    <i class="fas fa-location"></i>
+                    <span>Nearby</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="/community" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Community</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>

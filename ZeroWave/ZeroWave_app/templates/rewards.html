@@ -1,0 +1,913 @@
+
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rewards | ZeroWave</title>
+  <meta name="description" content="Redeem ZeroTokens for discounts, gadgets, and carbon offset rewards." />
+  <link rel="canonical" href="./rewards.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+  <style>
+    :root{
+      --primary: #8A9A5B;
+      --primary-glow: #A2B570;
+      --secondary: #E2725B;
+      --accent: #333333;
+      --bg: #F0F8A4;
+      --text: #333333;
+      --muted: #6E7A5A;
+      --card: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --border: hsl(210 16% 92%);
+    }
+    
+    [data-theme="dark"]{
+      --bg: #141811;
+      --text: #E6EAE0;
+      --muted: #9AA38F;
+      --card: #1D2219;
+      --border: #2B3326;
+    }
+    
+    [data-theme="dark"] body {
+      background: var(--bg);
+    }
+
+    *{
+      box-sizing:border-box
+    }
+
+    body{
+      margin:0;
+      background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      min-height:100vh;
+      display:flex
+    }
+
+    
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 1.25rem;
+      border-bottom:1px solid var(--border)
+    }
+
+    .muted{
+      color:var(--muted)
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:1rem;
+      box-shadow:var(--shadow)
+    }
+
+    .grid{
+      display:grid;
+      gap:1rem
+    }
+
+    @media(min-width:900px){
+      .grid-3
+      {
+        grid-template-columns:repeat(3,1fr)
+      }
+    }
+    
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.5rem;
+      border:0;
+      border-radius:12px;
+      padding:.6rem .9rem;
+      background:linear-gradient(135deg,var(--primary),var(--primary-glow));
+      color:#fff;
+      cursor:pointer
+    }
+
+    .balance{
+      display:flex;
+      align-items:center;
+      justify-content:space-between
+    }
+
+    .token{
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      font-weight:700;
+      font-size:2rem;
+      color:#fff
+    }
+
+    .impact-card { 
+      background: var(--card); 
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3); 
+      margin-bottom: 1.5rem; 
+      padding: 0; 
+      border: 1px solid var(--border);
+    }
+
+
+    .rewards-card { 
+      background: var(--card); 
+      border-radius: 12px; 
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3); 
+      margin-bottom: 1.5rem; 
+      padding: 0; 
+      border: 1px solid var(--border);
+    }
+
+    .rewards-card img {
+      width: 100%;
+      height: 180px;             
+      object-fit: cover;         
+      display: block;            
+      margin: 0;
+      padding: 0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .rewards-card-header { 
+      display: flex; 
+      padding-top: 1.5rem;
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 1.5rem; 
+    }
+
+    .rewards-card-title {
+      padding-top: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600; 
+    }
+
+
+    /* Filter Section */
+    .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .filter-group label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    .filter-group select, .filter-group input {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+    .filter-card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    th {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 2px solid var(--border);
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .badge.success { background: rgba(5, 172, 117, 0.1); color: lightseagreen; margin: 4px;}
+    .badge.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .badge.failed { background: rgba(245, 11, 11, 0.1); color: red; }
+    
+    .action-icons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-icons button {
+        background: none;
+        border: none;
+        color: var(--primary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .action-icons button:hover {
+        background: rgba(5, 109, 95, 0.1);
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal.active { display: flex; }
+    
+    .modal-content {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.5rem;
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6b7280;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    
+    .form-group input, .form-group textarea, .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .char-count {
+        text-align: right;
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    
+    .template-item {
+        padding: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .template-item:hover {
+        border-color: var(--primary);
+        background: rgba(5, 109, 95, 0.05);
+    }
+    
+    .template-item h4 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .template-item p {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar { transform: translateX(-100%); }
+        .main-content { margin-left: 0; }
+    }
+
+
+    .reward-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .reward-modal-content {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .close {
+      float: right;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background-color: var(--card);
+      color: var(--text);
+    }
+    .payment-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+    .pay-btn {
+      flex: 1;
+      margin: 0 0.3rem;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    [data-theme="dark"] .pay-btn {
+      background: #2b3326;
+      color: var(--primary-glow);
+    }
+    .pay-btn:hover {
+      background: #c8e6c9;
+    }
+    [data-theme="dark"] .pay-btn:hover {
+      background: #394432;
+    }
+    .submit-btn {
+      margin-top: 1.5rem;
+      width: 100%;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .submit-btn:hover {
+      background: #218838;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.95);}
+      to {opacity: 1; transform: scale(1);}
+    }
+        
+
+  </style>
+</head>
+<body>
+
+  {% include 'sidebar.html' %}
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 style="margin:0;font-family:Poppins,Inter,sans-serif">Rewards</h1>
+        <p class="muted" style="margin:.25rem 0 0">Redeem your ZeroTokens for amazing rewards</p>
+      </div>
+      <button id="themeToggle" class="theme" aria-label="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    </div>
+    <main style="padding:1.25rem;">
+
+    <main style="padding:1.25rem;">
+      <section class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary-glow));color:#fff;margin-bottom:1rem">
+        <div class="balance">
+          <div>
+            <div class="muted" style="color:#fff;opacity:.9">Your ZeroToken Balance</div>
+            <div class="token"><i class="fas fa-gift"></i><span id="tokenCount">0</span></div>
+          </div>
+          <div class="muted" style="color:#fff">Keep collecting to unlock more rewards!</div>
+        </div>
+      </section>
+
+      <section class="grid grid-3">
+        
+        <!-- Reward Cards -->
+        <div class="rewards-card">
+            <img src="https://www.africa50.com/fileadmin/_processed_/1/3/csm_BasiGo_Buses_102412944a.jpeg" alt="LPG Icon" >
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Basi Go Discount</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Enjoy eco-friendly travel with Basi Go’s electric buses. Redeem this offer for discounted fares and support clean mobility in Kenya’s cities.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 500</strong>
+            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://insiderkenya.com/wp-content/uploads/2023/02/Kenya-Power-Tokens.webp" alt="LPG Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">KPLC Electricity Tokens</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Empower your home with clean solar energy. Get subsidized KPLC tokens or installation support to reduce your electricity costs sustainably.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 2000</strong>
+            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://www.engineeringforchange.org/wp-content/uploads/2018/02/MKOPAIII_Sep14_026-e-01_resized.jpg" alt="LPG Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Pay Go</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Light up your home with affordable solar energy. Redeem this set to enjoy pay-as-you-go solar lighting that’s clean, reliable, and sustainable.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 300</strong>
+            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://kokofuel.com/wp-content/uploads/2020/02/FUEL_3.png" alt="LPG Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Koko Fuel</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Switch to cleaner cooking with Koko Fuel and reduce carbon emissions. Redeem now and we’ll plant 10 trees in your name — cooking with purpose!</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 1000</strong>
+            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://vivaldikenya.co.ke/wp-content/uploads/2021/08/distribute2x.jpg" alt="LPG Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Jikokoa</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Save energy and protect the planet with Jikokoa’s smart stove. It’s efficient, uses less charcoal, and helps cut household carbon emissions.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 1500</strong>
+            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://stlight.solar/wp-content/uploads/2025/06/SK-321-BOOM-01-FRONT-BACK-02-022622-scaled-1.jpg" alt="LPG Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">SunKing</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Power your nights sustainably with SunKing solar solutions. Redeem this reward for bright, affordable lighting and a 1-ton CO₂ offset certification.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 800</strong>
+            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+          </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="redeemModal" class="reward-modal">
+          <div class="reward-modal-content">
+            <span class="close" onclick="closeRedeemModal()">&times;</span>
+            <h3>Redeem Reward</h3>
+
+            <form id="redeemForm">
+              <label for="uniqueId">Unique ID</label>
+              <input type="text" id="uniqueId" name="uniqueId" placeholder="Enter your unique ID" required>
+
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" placeholder="e.g. 07XXXXXXXX" required>
+
+              <p>Select Payment Method:</p>
+              <div class="payment-buttons">
+                <button type="button" class="pay-btn">Send Money</button>
+                <button type="button" class="pay-btn">Paybill</button>
+                <button type="button" class="pay-btn">Buy Goods</button>
+              </div>
+
+              <button type="submit" class="submit-btn">Confirm Redemption</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Impact -->
+      <div class="card" style="padding: 20px; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+        <div class="card-header">
+            <h3 class="card-title" >Impact Metrics</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding-top: 10px;">
+            <div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="color: #6b7280; font-size: 0.875rem;">CO₂ Emissions Saved</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">0.0 Kgs</div>
+                <div style="color: #10b981; font-size: 0.875rem;">+0% vs last week</div>
+            </div>
+            <div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="color: #6b7280; font-size: 0.875rem;">Waste Diverted</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">0.0 Kgs</div>
+                <div style="color: red; font-size: 0.875rem;">-0% vs last month</div>
+            </div>
+            <div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="color: #6b7280; font-size: 0.875rem;">Trees Planted/Restored</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">0</div>
+                <div style="color: #10b981; font-size: 0.875rem;">+0% improvement</div>
+            </div>
+            <div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="color: #6b7280; font-size: 0.875rem;">Energy Generated (kWh)</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">0 kWh</div>
+                <div style="color: red; font-size: 0.875rem;">-0% vs last quarter</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Reminder / Target -->
+    <div class="filters">
+      <div class="filter-group">
+          <label>Status</label>
+          <select>
+              <option>All Campaigns</option>
+              <option>Tree Planting</option>
+              <option>Waste Recycling</option>
+              <option>Carbon Reduction</option>
+              <option>Water Conservation</option>
+              <option>Community Clean-up</option>
+              <option>Renewable Energy</option>
+          </select>
+      </div>
+      <div class="filter-group">
+          <label>Date Range</label>
+          <input type="date">
+      </div>
+      <div class="filter-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="openModal()">
+              <i class="fas fa-plus"></i> Impact Campaign
+          </button>
+      </div>
+  </div>
+
+  <div class="content-grid">
+      <div class="filter-card" style="margin-bottom: 1.5em; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+          <div class="card-header">
+              <h3 class="card-title">Impact History</h3>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Title</th>
+                      <th>Impact Type</th>
+                      <th>Target Date</th>
+                      <th>Remarks</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">No campaigns found. Create your first campaign above!</td>
+                  </tr>
+              </tbody>
+          </table>
+          <button class="btn btn-accent" style="width: 100%;">
+              <i class="fas fa-download"></i> Download Report
+          </button>
+      </div>
+
+      <!-- Create Campaign Modal -->
+      <div id="campaignModal" class="modal">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h3>Create Impact Campaign</h3>
+                  <button class="close-btn" onclick="closeModal()">&times;</button>
+              </div>
+              <form onsubmit="sendCampaign(event)">
+                  <div class="form-group">
+                      <label>Campaign Title</label>
+                      <input type="text" placeholder="e.g., Green Belt Revolution" required>
+                  </div>
+
+                  <div class="form-group">
+                      <label>Impact Type</label>
+                      <select>
+                          <option>Tree Planting</option>
+                          <option>Waste Recycling</option>
+                          <option>Carbon Reduction</option>
+                          <option>Water Conservation</option>
+                          <option>Community Clean-up</option>
+                          <option>Renewable Energy</option>
+                      </select>
+                  </div>
+                  
+                  <!-- <div class="form-group">
+                      <label>Impact Type</label>
+                      <input type="text" placeholder="e.g., ComHero or YourBrand" maxlength="11">
+                  </div> -->
+
+
+                  <div class="filter-group">
+                      <div class="filter-group">
+                        <label>Start Date</label>
+                        <input type="date">
+                      </div>
+                  </div>
+                  
+                  <div class="filter-group">
+                      <label>End Date</label>
+                      <input type="date">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label>Description</label>
+                      <textarea id="messageText" rows="4" placeholder="Describe your waste to energy impact" oninput="updateCharCount()"></textarea>
+                      <div class="char-count" id="charCount">0 / 160 characters</div>
+                  </div>
+                  
+                  <!-- <div class="form-group">
+                      <label>Personalization Preview</label>
+                      <div style="padding: 1rem; background: #f3f4f6; border-radius: 8px; font-size: 0.875rem;">
+                          <strong>Sample:</strong> Hi John, your payment of Ksh 500 was successful. View: http://link.co/abc
+                      </div>
+                  </div> -->
+                  
+                  <div class="form-group">
+                      <label>Target Plan</label>
+                      <textarea rows="3" placeholder="Upload File"></textarea>
+                      <button type="button" class="btn btn-accent" style="margin-top: 0.5rem;" onclick="document.getElementById('csvUpload').click()">
+                          <i class="fas fa-upload"></i> Upload File
+                      </button>
+                      <input type="file" id="csvUpload" accept=".csv" style="display: none;" onchange="previewCSV(event)">
+                      <div id="csvPreview" style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;"></div>
+                  </div>
+                  
+                  <div class="form-group">
+                      <label></label>
+                      <div style="padding: 1rem; background: rgba(5, 109, 95, 0.1); border-radius: 8px; color: var(--primary); font-weight: 600;">
+                          Join the sustainability revolution. Transform your waste into valuable energy and earn rewards while saving the planet.
+                          <!-- In production: cost calculated via PayHero API -->
+                      </div>
+                  </div>
+                  
+                  <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                      <button type="button" class="btn" style="background: lightcoral; flex: 1;" onclick="sendTest()">
+                          <i class="fas fa-trash"></i> Cancel
+                      </button>
+                      <button type="submit" class="btn btn-primary" style="flex: 1;">
+                          <i class="fas fa-paper-plane"></i> Create Campaign
+                      </button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+    </main>
+  </div>
+
+  {% include 'chatbox.html' %}
+  <script>
+
+        function openRedeemModal() {
+          document.getElementById('redeemModal').style.display = 'flex';
+        }
+        function closeRedeemModal() {
+          document.getElementById('redeemModal').style.display = 'none';
+        }
+        window.onclick = function(event) {
+          if (event.target === document.getElementById('redeemModal')) {
+            closeRedeemModal();
+          }
+        };
+
+        // Modal controls
+        function openModal() {
+            document.getElementById('campaignModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('campaignModal').classList.remove('active');
+        }
+        
+        // Character counter
+        function updateCharCount() {
+            const text = document.getElementById('messageText').value;
+            document.getElementById('charCount').textContent = `${text.length} / 160 characters`;
+        }
+        
+        // CSV preview (client-side only)
+        function previewCSV(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const lines = e.target.result.split('\n').slice(0, 4); // First 3 data rows + header
+                    document.getElementById('csvPreview').innerHTML = `
+                        <strong>Preview (first 3 rows):</strong><br>
+                        ${lines.join('<br>')}
+                    `;
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        // Use template
+        function useTemplate(type) {
+            const templates = {
+                payment: 'Your payment of Ksh {{amount}} has been received. Ref: {{reference}}. Thank you!',
+                order: 'Hi {{name}}, your order #{{order_id}} is being processed and will be delivered by {{date}}.',
+                otp: 'Your verification code is {{code}}. Valid for 5 minutes. Do not share.'
+            };
+            document.getElementById('messageText').value = templates[type];
+            updateCharCount();
+            openModal();
+        }
+        
+        // Send test SMS
+        function sendTest() {
+            // In production: POST to PayHero API /sms/send-test
+            alert('✅ Test SMS sent to your registered number!');
+        }
+        
+        // Send campaign
+        function sendCampaign(event) {
+            event.preventDefault();
+            // In production: POST to PayHero API /sms/campaigns with form data
+            // PayHero would handle: recipient parsing, cost calculation, sending, delivery tracking
+            alert('✅ Campaign created! Sending in progress...');
+            closeModal();
+            // Would add new row to campaigns table with "In Progress" status
+        }
+        
+        // Download report (client-side CSV generation)
+        function downloadReport(campaignName) {
+            const csv = `Phone,Status,Delivered At,Cost\n+254712345678,Delivered,2025-01-15 10:30,1.45\n+254723456789,Delivered,2025-01-15 10:31,1.45\n+254734567890,Failed,N/A,0`;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${campaignName}-report.csv`;
+            a.click();
+        }
+
+
+
+        // Send Campaign
+        function updateCharCount() {
+            const textarea = document.getElementById('messageText');
+            const count = document.getElementById('charCount');
+            count.textContent = `${textarea.value.length} / 160 characters`;
+        }
+
+        // Optional: CSV preview handler
+        function previewCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const lines = e.target.result.split('\n').filter(Boolean);
+                document.getElementById('csvPreview').innerText = `${lines.length} recipients loaded`;
+            };
+            reader.readAsText(file);
+        }
+
+        // ✅ Main campaign submission function
+        async function sendCampaign(event) {
+            event.preventDefault();
+
+            const campaignName = document.querySelector('input[placeholder="e.g., Flash Sale Alert"]').value.trim();
+            const senderName = document.querySelector('input[placeholder="e.g., ComHero or YourBrand"]').value.trim();
+            const message = document.getElementById('messageText').value.trim();
+            const schedule = document.querySelector('select').value;
+            const recipients = document.querySelector('textarea[rows="3"]').value
+                .split('\n')
+                .map(num => num.trim())
+                .filter(Boolean);
+
+            if (!recipients.length) {
+                alert("⚠️ Please provide at least one recipient number.");
+                return;
+            }
+
+            const payload = {
+                campaign_name: campaignName,
+                sender_name: senderName,
+                message: message,
+                schedule: schedule,
+                recipients: recipients
+            };
+
+            try {
+                const response = await fetch('/send_campaign/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("✅ Campaign sent successfully!");
+                    console.log(data);
+                    closeModal();
+                } else {
+                    alert("❌ Failed to send campaign: " + data.error);
+                }
+            } catch (error) {
+                alert("❌ Network error: " + error);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('campaignModal').style.display = 'none';
+        }
+
+
+    const t=document.getElementById('themeToggle');
+    t.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
+    if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';
+    // Token counter animation
+    const target=3890; const el=document.getElementById('tokenCount');
+    let c=0; const step=Math.max(1,Math.round(target/80));
+    const int=setInterval(()=>{c+=step; if(c>=target){c=target; clearInterval(int);} el.textContent=c.toLocaleString();},16);
+  </script>
+</body>
+</html>

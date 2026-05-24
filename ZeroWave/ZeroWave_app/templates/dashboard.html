@@ -1,0 +1,659 @@
+{% load static %}
+
+<!Doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard | ZeroWave</title>
+  <meta name="description" content="ZeroWave Dashboard: Track waste recycled, energy generated, and carbon credits earned." />
+  <link rel="canonical" href="./dashboard.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --primary: #8A9A5B;
+      --primary-glow: #A2B570;
+      --secondary: #E2725B;
+      --accent: #333333;
+      --bg: #F0F8A4;
+      --text: #333333;
+      --muted: #6E7A5A;
+      --card: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --border: hsl(210 16% 92%);
+    }
+    
+    [data-theme="dark"]{
+      --bg: #141811;
+      --text: #E6EAE0;
+      --muted: #9AA38F;
+      --card: #1D2219;
+      --border: #2B3326;
+    }
+    
+    [data-theme="dark"] body {
+      background: var(--bg);
+    }
+    
+    *{
+      box-sizing:border-box
+    }
+    
+    body{
+      margin:0;
+      background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      min-height:100vh;
+      display:flex
+    
+    }
+    
+    
+
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 1.25rem;
+      border-bottom:1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .menu-toggle {
+        display: block;
+      }
+      body {
+        flex-direction: column;
+      }
+      .main {
+        margin-left: 0;
+      }
+    }
+
+    [data-theme="dark"] .topbar{
+      border-color:hsl(210 10% 20%)
+    }
+
+    .theme{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      padding:.5rem;
+      border-radius:10px;
+      cursor:pointer
+    }
+
+    .grid{
+      display:grid;
+      gap:1rem
+    }
+
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    @media(min-width:900px){
+      .grid-2{grid-template-columns:2fr 1fr
+      }
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:1rem;
+      box-shadow:var(--shadow)
+    }
+
+    [data-theme="dark"] .card{
+      border-color:hsl(210 10% 20%)
+    }
+
+    .stat{
+      display:flex;
+      align-items:center;
+      justify-content:space-between
+    }
+
+    .stat .icon{
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      background:hsl(160 60% 92%);
+      color:var(--primary);
+      display:grid;
+      place-items:center
+    }
+
+    .muted{
+      color:var(--muted)
+    }
+
+    .progress{
+      height:10px;
+      background:hsl(210 16% 92%);
+      border-radius:999px;
+      overflow:hidden
+    }
+
+    .progress>span{
+      display:block;
+      height:100%;
+      background:linear-gradient(90deg,var(--primary),var(--primary-glow))
+    }
+
+    .activity{
+      display:flex;
+      gap:.75rem;
+      padding:.75rem 0;
+      border-bottom:1px solid hsl(210 16% 92%)
+    }
+
+    .activity:last-child{
+      border:0
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .action-btn {
+        background: var(--card);
+        border: 2px solid var(--border);
+        padding: 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        color: var(--text);
+    }
+    
+    .action-btn:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+    
+    .action-btn i {
+        font-size: 2rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--card);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon.primary { background: rgba(5, 109, 95, 0.1); color: var(--primary); }
+    .stat-icon.accent { background: rgba(255, 209, 102, 0.2); color: var(--accent); }
+    .stat-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    
+    .stat-label {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-change {
+        color: #10b981;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    /* Activity Table */
+    .card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+    
+    th {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 2px solid var(--border);
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .badge.success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .badge.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    
+
+    /* Charts */
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .chart-card {
+        background: var(--card);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .chart-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .chart-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chart-body {
+        padding: 20px;
+        height: 350px;
+    }
+
+  </style>
+
+
+</head>
+<body>
+  
+
+  {% include 'sidebar.html' %}
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h1 style="margin:0;font-family:Poppins,Inter,sans-serif">Dashboard</h1>
+          <p class="muted" style="margin:.25rem 0 0">Here's your sustainability impact overview</p>
+        </div>
+      </div>
+      <button id="themeToggle" class="theme" aria-label="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    </div>
+    <main style="padding:1.25rem;">
+      
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+          <div class="stat-card">
+              <div class="stat-header">
+                  <div>
+                      <div class="stat-label">Waste Recycled</div>
+                      <div class="stat-value">0.0 Kgs</div>
+                      <div class="stat-change">
+                          <i class="fas fa-arrow-up"></i> +0% from last month
+                      </div>
+                  </div>
+                  <div class="stat-icon primary">
+                      <i class="fas fa-recycle"></i>
+                  </div>
+              </div>
+          </div>
+
+          <div class="stat-card">
+              <div class="stat-header">
+                  <div>
+                      <div class="stat-label">Energy Generated</div>
+                      <div class="stat-value">0 kWh</div>
+                      <div class="stat-change">
+                          <i class="fas fa-arrow-up"></i> +0% this week
+                      </div>
+                  </div>
+                  <div class="stat-icon accent">
+                      <i class="fas fa-bolt"></i>
+                  </div>
+              </div>
+          </div>
+
+          <div class="stat-card">
+              <div class="stat-header">
+                  <div>
+                      <div class="stat-label">Carbon Credits</div>
+                      <div class="stat-value">0</div>
+                      <div class="stat-change">
+                          <i class="fas fa-arrow-up"></i> +0% improvement
+                      </div>
+                  </div>
+                  <div class="stat-icon success">
+                      <i class="fas fa-award"></i>
+                  </div>
+              </div>
+          </div>
+
+          <div class="stat-card">
+              <div class="stat-header">
+                  <div>
+                      <div class="stat-label">ZeroTokens</div>
+                      <div class="stat-value">0</div>
+                      <div class="stat-change">
+                          <i class="fas fa-arrow-up"></i> +0% vs last month
+                      </div>
+                  </div>
+                  <div class="stat-icon primary">
+                      <i class="fas fa-leaf"></i>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- <section class="grid grid-2" style="margin-top:1rem">
+        <div class="card">
+          <h2 style="margin-top:0">Weekly Collection Progress</h2>
+          <div style="display:grid;gap:1rem">
+            <div>
+              <div style="display:flex;justify-content:space-between"><strong>Plastic Waste</strong><span class="muted">15 kg / 20 kg</span></div>
+              <div class="progress"><span style="width:75%"></span></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between"><strong>Organic Waste</strong><span class="muted">22 kg / 25 kg</span></div>
+              <div class="progress"><span style="width:88%"></span></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between"><strong>Metal & Glass</strong><span class="muted">8 kg / 15 kg</span></div>
+              <div class="progress"><span style="width:53%"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2 style="margin-top:0">Recent Activities</h2>
+          <div>
+            <div class="activity"><div style="width:8px;height:8px;border-radius:999px;background:var(--primary);margin-top:8px"></div><div style="flex:1"><div>Waste Collection Completed</div><div class="muted" style="font-size:.9rem">2 hours ago</div></div><strong class="muted">+45</strong></div>
+            <div class="activity"><div style="width:8px;height:8px;border-radius:999px;background:var(--primary);margin-top:8px"></div><div style="flex:1"><div>Energy Conversion</div><div class="muted" style="font-size:.9rem">5 hours ago</div></div><strong class="muted">+30</strong></div>
+            <div class="activity"><div style="width:8px;height:8px;border-radius:999px;background:var(--primary);margin-top:8px"></div><div style="flex:1"><div>Weekly Goal Achieved</div><div class="muted" style="font-size:.9rem">1 day ago</div></div><strong class="muted">+100</strong></div>
+            <div class="activity"><div style="width:8px;height:8px;border-radius:999px;background:var(--primary);margin-top:8px"></div><div style="flex:1"><div>Reward Redeemed: LPG Discount</div><div class="muted" style="font-size:.9rem">2 days ago</div></div><strong class="muted">-500</strong></div>
+          </div>
+        </div>
+      </section> -->
+
+      
+
+      <!-- Recent Activity -->
+      <div class="card">
+          <div class="card-header">
+              <h3 class="card-title">Recent Activity</h3>
+          </div>
+          <div class="table-container">
+          <table>
+              <thead>
+                  <tr>
+                      <th>Date</th>
+                      <th>Action</th>
+                      <th>Category</th>
+                      <th>Tokens</th>
+                      <th>Status</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td colspan="5" style="text-align: center; color: var(--muted); padding: 2rem;">No recent activity. Keep recycling to start earning!</td>
+                  </tr>
+              </tbody>
+          </table>
+          </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-grid">
+          <div class="chart-card">
+              <div class="chart-header">
+                  <h3 class="chart-title">
+                      <i class="fas fa-chart-bar text-primary"></i>
+                      Monthly Waste Trends
+                  </h3>
+              </div>
+              <div class="chart-body">
+                  <canvas id="monthlyChart"></canvas>
+              </div>
+          </div>
+
+          <div class="chart-card">
+              <div class="chart-header">
+                  <h3 class="chart-title">
+                      <i class="fas fa-shield-alt text-primary"></i>
+                      Waste Categories
+                  </h3>
+              </div>
+              <div class="chart-body">
+                  <canvas id="fraudChart"></canvas>
+              </div>
+          </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+          <div class="card-header">
+              <h3 class="card-title">Quick Actions</h3>
+          </div>
+          <div class="quick-actions">
+              <div class="action-btn" onclick="window.location.href=''">
+                  <i class="fas fa-sms"></i>
+                  <div style="font-weight: 600;">SMS Notification</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Recieve sms updates</div>
+              </div>
+              <div class="action-btn" onclick="window.location.href='/settings'">
+                  <i class="fas fa-mobile"></i>
+                  <div style="font-weight: 600;">Contact Us</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">24/7 Customer Support</div>
+              </div>
+              <div class="action-btn" onclick="window.location.href='/rewards'">
+                  <i class="fas fa-gift"></i>
+                  <div style="font-weight: 600;">Redeem Tokens</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Enjoy Reduced</div>
+              </div>
+              <div class="action-btn" onclick="alert('Download started!')">
+                  <i class="fas fa-download"></i>
+                  <div style="font-weight: 600;">Download Report</div>
+                  <div style="font-size: 0.875rem; color: #6b7280;">Analytics, Metrics & Insights</div>
+              </div>
+          </div>
+      </div>
+    </main>
+  </div>
+
+  {% include 'chatbox.html' %}
+
+  <script>
+    const t=document.getElementById('themeToggle');
+    t.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
+    if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';
+
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    if (menuToggle && sidebar) {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+    }
+
+    // Monthly Trends Chart
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyChart = new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Organic',
+                    data: [0, 0, 0, 0, 0, 0],
+                    backgroundColor: '#10b981',
+                    borderRadius: 4
+                },
+                {
+                    label: 'E-waste',
+                    data: [0, 0, 0, 0, 0, 0],
+                    backgroundColor: '#ef4444',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Recyclables',
+                    data: [0, 0, 0, 0, 0, 0],
+                    backgroundColor: '#f59e0b',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e2e8f0'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Fraud Categories Chart
+    const fraudCtx = document.getElementById('fraudChart').getContext('2d');
+    const fraudChart = new Chart(fraudCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Organic', 'E-waste', 'Recyclabes', 'Agricultural'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: ['#10b981', '#f97316', '#eab308', '#06b6d4'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
