@@ -11,12 +11,12 @@
   <style>
     /* ===== Reset & tokens ===== */
     :root{
-      --bg: #F0F8A4;
+      --bg: #FFF6DE;
       --card: #ffffff;
       --text: #333333;
-      --muted: #6E7A5A;
-      --accent: #8A9A5B;
-      --accent-2: #E2725B;
+      --muted: #546E7A;
+      --accent: #2F578A;
+      --accent-2: #F48F68;
       --glass: rgba(255,255,255,0.9);
       --radius: 12px;
       --shadow: 0 8px 20px rgba(138,154,91,0.06);
@@ -25,19 +25,19 @@
       --border: #e6f0ea;
     }
     [data-theme="dark"]{
-      --bg: #141811;
-      --card: #1D2219;
-      --text: #E6EAE0;
-      --muted: #9AA38F;
-      --accent: #8A9A5B;
-      --accent-2: #E2725B;
+      --bg: #11161d;
+      --card: #18222f;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --accent: #2F578A;
+      --accent-2: #F48F68;
       --glass: rgba(29, 34, 25, 0.9);
       --shadow: 0 8px 20px rgba(0,0,0,0.4);
-      --border: #2B3326;
+      --border: #253447;
     }
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:var(--mono);background:linear-gradient(180deg,#FAFDF3,#F0F8A4);color:var(--text)}
-    [data-theme="dark"] html, [data-theme="dark"] body{background:linear-gradient(180deg,#141811,#1D2219)}
+    html,body{height:100%;margin:0;font-family:var(--mono);background:linear-gradient(180deg,#FFFDF9,#FFF6DE);color:var(--text)}
+    [data-theme="dark"] html, [data-theme="dark"] body{background:linear-gradient(180deg,#11161d,#18222f)}
     a{color:inherit}
     /* ===== Layout ===== */
     .page{
@@ -92,7 +92,7 @@
     .item h4{margin:6px 0 0}
     .price{font-weight:800;color:#0b6b36;margin-top:8px}
     /* ===== Modals & panes ===== */
-    .overlay{position:fixed;inset:0;background:rgba(4,10,8,0.36);display:none;align-items:center;justify-content:center;z-index:99}
+    .overlay{position:fixed;inset:0;background:rgba(4,10,8,0.36);display:none;align-items:center;justify-content:center;z-index:9999}
     .modal{width:720px;max-width:95%;background:white;border-radius:12px;padding:18px}
     
     [data-theme="dark"] .stat {
@@ -212,11 +212,13 @@
           <input id="search" type="search" placeholder="Search communities, leads, tags..." aria-label="Search">
           <select id="region">
             <option value="all">All regions</option>
-            <option value="eastlands">Eastlands</option>
-            <option value="cbd">CBD</option>
-            <option value="westlands">Westlands</option>
-            <option value="karen">Karen</option>
-            <option value="rongai">Rongai</option>
+            <option value="delhi">Delhi NCR</option>
+            <option value="mumbai">Mumbai Metro</option>
+            <option value="bengaluru">Bengaluru</option>
+            <option value="hyderabad">Hyderabad</option>
+            <option value="chennai">Chennai</option>
+            <option value="kolkata">Kolkata</option>
+            <option value="pune">Pune</option>
           </select>
           <select id="category">
             <option value="all">All categories</option>
@@ -310,7 +312,7 @@
           <div class="market">
             <div class="item card-center">
               <h4>Buy Verified Credits</h4>
-              <div class="price">40 KES / credit</div>
+              <div class="price">₹40 / credit</div>
               <div class="small" style="margin-top:6px">Sourced from reforestation & compost projects</div>
               <div style="margin-top:12px"><input id="buyAmount" type="number" min="1" placeholder="Credits to buy" style="padding:8px;border-radius:8px;border:1px solid #e6f0ea;width:140px"/> <button class="btn" id="buyBtn">Buy</button></div>
             </div>
@@ -402,7 +404,13 @@
           <div>
             <label class="small">Region</label>
             <select id="cRegion" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e6f0ea">
-              <option value="cbd">CBD</option><option value="westlands">Westlands</option><option value="karen">Karen</option><option value="eastlands">Eastlands</option>
+              <option value="delhi">Delhi NCR</option>
+              <option value="mumbai">Mumbai Metro</option>
+              <option value="bengaluru">Bengaluru</option>
+              <option value="hyderabad">Hyderabad</option>
+              <option value="chennai">Chennai</option>
+              <option value="kolkata">Kolkata</option>
+              <option value="pune">Pune</option>
             </select>
           </div>
         </div>
@@ -432,28 +440,46 @@
 
   <script>
   /**********************
-   * Simulated datastore (could be replaced by API calls)
+   * Dynamic Datastore from Backend Context
    **********************/
   const STORAGE_KEY = 'zerowave_communities_v2';
-  let user = { id: 'u001', name: 'You', tokens: 0, role: 'Member', following: [], joined: [] };
+  let user = { id: 'u001', name: 'You', tokens: {{ profile.tokens_balance }}, role: '{{ profile.user.memberships.first.role|default:"Member" }}', following: {{ user_following_json|safe }}, joined: {{ user_joined_json|safe }} };
 
   // initial communities sample
-  const seed = [];
-
-
-  function loadData(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-    return seed.slice();
-  }
-  let communities = loadData();
+  const seed = {{ communities_json|safe }};
+  let communities = seed;
 
   /**********************
    * Map & markers
    **********************/
-  const map = L.map('map',{zoomControl:true}).setView([-1.286389,36.817223],11);
+  const userCity = "{{ profile.region|safe }}";
+  const cityCoords = {
+      'delhi': [28.6139, 77.2090],
+      'mumbai': [19.0760, 72.8777],
+      'bengaluru': [12.9716, 77.5946],
+      'hyderabad': [17.3850, 78.4867],
+      'chennai': [13.0827, 80.2707],
+      'kolkata': [22.5726, 88.3639],
+      'pune': [18.5204, 73.8567]
+  };
+
+  let lat = 12.9716;
+  let lng = 77.5946;
+  if (cityCoords[userCity]) {
+      lat = cityCoords[userCity][0];
+      lng = cityCoords[userCity][1];
+  }
+
+  const map = L.map('map',{zoomControl:true}).setView([lat, lng],11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      map.setView([position.coords.latitude, position.coords.longitude], 11);
+    }, () => {
+      console.log("Using city center coordinates");
+    });
+  }
   let markers = {}; // id -> marker
 
   function renderMarkers(filterRegion='all', filterCat='all', q=''){
@@ -585,73 +611,139 @@
     map.setView([c.lat,c.lng],13,{animate:true});
   }
 
-  function toggleJoin(id, btnEl){
-    if(user.joined.includes(id)){
-      user.joined = user.joined.filter(x=>x!==id);
-      // update members count
-      const c = communities.find(x=>x.id===id); c.members = Math.max(0, (c.members||1)-1);
-    } else {
-      user.joined.push(id);
-      const c = communities.find(x=>x.id===id); c.members = (c.members||0)+1;
-    }
-    persist();
-    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
-    if(btnEl) btnEl.textContent = user.joined.includes(id)?'Leave':'Join';
-    // update detail if open
-    if(document.getElementById('detailPane').style.display !== 'none'){
-      showDetail(id);
+  async function toggleJoin(id, btnEl){
+    try {
+      const response = await fetch('/api/community/join/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ community_id: id })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        if (data.action === 'joined') {
+          user.joined.push(id);
+          alert('Successfully joined community!');
+        } else {
+          user.joined = user.joined.filter(x=>x!==id);
+          alert('Left community.');
+        }
+        const c = communities.find(x=>x.id===id);
+        if(c) c.members = data.members_count;
+        
+        renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+        if(btnEl) btnEl.textContent = user.joined.includes(id)?'Leave':'Join';
+        if(document.getElementById('detailPane').style.display !== 'none'){
+          showDetail(id);
+        }
+      } else {
+        alert('Action failed: ' + data.message);
+      }
+    } catch(err) {
+      alert('Error: ' + err);
     }
   }
 
   function toggleFollow(id){
     if(user.following.includes(id)) user.following = user.following.filter(x=>x!==id);
     else user.following.push(id);
-    persist();
     showDetail(id);
   }
 
-  function applyToLead(id){
-    const c = communities.find(x=>x.id===id);
-    if(!c) return;
-    // simulate application approval flow: store applicant flag
-    c.leadApplicant = {userId:user.id, when: new Date().toISOString()};
-    persist();
-    alert('Application submitted. Community admins will review your application.');
-    showDetail(id);
+  async function applyToLead(id){
+    try {
+      const response = await fetch('/api/community/apply-lead/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ community_id: id })
+      });
+      if (response.ok) {
+        const c = communities.find(x=>x.id===id);
+        if(c) c.leadApplicant = true;
+        alert('Application submitted successfully!');
+        showDetail(id);
+      } else {
+        alert('Failed to submit application.');
+      }
+    } catch(err) {
+      alert('Error: ' + err);
+    }
   }
 
   /**********************
    * Marketplace actions
    **********************/
   let orders = [];
-  function buyCredits(){
+  async function buyCredits(){
     const n = Number(document.getElementById('buyAmount').value || 0);
     if(!n || n <= 0){ alert('Enter a positive credit amount'); return; }
-    const cost = n * 40; // KES per credit
-    if(!confirm(`Buy ${n} credits for KES ${cost}?`)) return;
-    user.tokens += n;
-    orders.push({id:'o'+Date.now(), type:'buy', amount:n, cost:cost, when: new Date().toISOString()});
-    persist();
-    renderOrders();
-    alert('Purchase successful — tokens added to your balance.');
+    const cost = n * 40;
+    if(!confirm(`Buy ${n} credits for ₹${cost}?`)) return;
+    
+    try {
+      const response = await fetch('/api/marketplace/trade/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ type: 'buy', amount: n })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        user.tokens = data.new_balance;
+        document.getElementById('userTokens').textContent = user.tokens + ' ZeroTokens';
+        orders.push({id:'o'+Date.now(), type:'buy', amount:n, cost:cost, when: new Date().toISOString()});
+        renderOrders();
+        alert('Purchase successful — carbon credits acquired!');
+      } else {
+        alert('Purchase failed: ' + data.message);
+      }
+    } catch(err) {
+      alert('Error: ' + err);
+    }
   }
-  function sellCredits(){
+
+  async function sellCredits(){
     const n = Number(document.getElementById('sellAmount').value || 0);
     if(!n || n <= 0){ alert('Enter a positive credit amount'); return; }
     if(user.tokens < n){ alert('Not enough tokens'); return; }
-    const price = n * 35; // marketplace price
-    if(!confirm(`List ${n} credits for sale at KES ${price}?`)) return;
-    user.tokens -= n;
-    orders.push({id:'o'+Date.now(), type:'sell', amount:n, price:price, when: new Date().toISOString()});
-    persist();
-    renderOrders();
-    alert('Credits listed for sale (simulated).');
+    const price = n * 35;
+    if(!confirm(`List ${n} credits for sale at ₹${price}?`)) return;
+
+    try {
+      const response = await fetch('/api/marketplace/trade/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ type: 'sell', amount: n })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        user.tokens = data.new_balance;
+        document.getElementById('userTokens').textContent = user.tokens + ' ZeroTokens';
+        orders.push({id:'o'+Date.now(), type:'sell', amount:n, price:price, when: new Date().toISOString()});
+        renderOrders();
+        alert('Credits listed successfully in marketplace!');
+      } else {
+        alert('Listing failed: ' + data.message);
+      }
+    } catch(err) {
+      alert('Error: ' + err);
+    }
   }
 
   function renderOrders(){
     const el = document.getElementById('orders');
     if(orders.length===0){ el.textContent = 'No orders yet'; return; }
-    el.innerHTML = orders.map(o=>`${o.type.toUpperCase()} • ${o.amount} credits • ${o.cost?o.cost:o.price || ''} KES`).join('<br>');
+    el.innerHTML = orders.map(o=>`${o.type.toUpperCase()} • ${o.amount} credits • ₹${o.cost?o.cost:o.price || ''}`).join('<br>');
   }
 
   /**********************
@@ -664,22 +756,41 @@
     overlay.style.display='flex';
   }
   function closeModal(){ overlay.style.display='none'; }
-  function createCommunity(){
+  
+  async function createCommunity(){
     const name = document.getElementById('cName').value.trim();
     const region = document.getElementById('cRegion').value;
     const category = document.getElementById('cCat').value;
     const desc = document.getElementById('cDesc').value.trim();
     if(!name || !desc){ alert('Name and description required'); return; }
-    const id = 'c'+Date.now();
-    const lat = map.getCenter().lat + (Math.random()-0.5)/50;
-    const lng = map.getCenter().lng + (Math.random()-0.5)/50;
-    const newC = { id, name, region, category, lat, lng, tagline: desc.slice(0,60), desc, verified:false, members:1, points:0, credits:0, impact:[], events:[], membersList:[user.name] };
-    communities.push(newC);
-    persist();
-    renderMarkers(document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
-    renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
-    closeModal();
-    alert('Community created — waiting verification.');
+    
+    try {
+      const response = await fetch('/api/community/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+          name: name,
+          region: region,
+          category: category,
+          description: desc
+        })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        communities.push(data.community);
+        renderMarkers(document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+        renderList(document.getElementById('sortBy').value, document.getElementById('region').value, document.getElementById('category').value, document.getElementById('search').value);
+        closeModal();
+        alert('Community created successfully! Pending administrative review.');
+      } else {
+        alert('Failed to create community: ' + data.message);
+      }
+    } catch(err) {
+      alert('Error: ' + err);
+    }
   }
 
   /**********************

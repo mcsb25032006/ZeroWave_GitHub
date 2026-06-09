@@ -17,25 +17,25 @@
     
   <style>
     :root{
-      --primary: #8A9A5B;
-      --primary-glow: #A2B570;
-      --secondary: #E2725B;
+      --primary: #2F578A;
+      --primary-glow: #4a78b5;
+      --secondary: #F48F68;
       --accent: #333333;
-      --bg: #F0F8A4;
+      --bg: #FFF6DE;
       --text: #333333;
-      --muted: #6E7A5A;
+      --muted: #546E7A;
       --card: #ffffff;
       --radius: 16px;
-      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --shadow: 0 10px 30px -10px rgba(47, 87, 138, 0.15);
       --border: hsl(210 16% 92%);
     }
     
     [data-theme="dark"]{
-      --bg: #141811;
-      --text: #E6EAE0;
-      --muted: #9AA38F;
-      --card: #1D2219;
-      --border: #2B3326;
+      --bg: #11161d;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --card: #18222f;
+      --border: #253447;
     }
     
     [data-theme="dark"] body {
@@ -48,7 +48,7 @@
 
     body{
       margin:0;
-      background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);
+      background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);
       color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       min-height:100vh;
@@ -486,62 +486,62 @@
         
         <!-- Reward Cards -->
         <div class="rewards-card">
-            <img src="https://www.africa50.com/fileadmin/_processed_/1/3/csm_BasiGo_Buses_102412944a.jpeg" alt="LPG Icon" >
-          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Basi Go Discount</h5>
-          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Enjoy eco-friendly travel with Basi Go’s electric buses. Redeem this offer for discounted fares and support clean mobility in Kenya’s cities.</p>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
-            <strong><i class="fas fa-coins"></i> 500</strong>
-            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
-          </div>
-        </div>
-
-        <div class="rewards-card">
-          <img src="https://insiderkenya.com/wp-content/uploads/2023/02/Kenya-Power-Tokens.webp" alt="LPG Icon">
-          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">KPLC Electricity Tokens</h5>
-          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Empower your home with clean solar energy. Get subsidized KPLC tokens or installation support to reduce your electricity costs sustainably.</p>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
-            <strong><i class="fas fa-coins"></i> 2000</strong>
-            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
-          </div>
-        </div>
-
-        <div class="rewards-card">
-          <img src="https://www.engineeringforchange.org/wp-content/uploads/2018/02/MKOPAIII_Sep14_026-e-01_resized.jpg" alt="LPG Icon">
-          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Pay Go</h5>
-          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Light up your home with affordable solar energy. Redeem this set to enjoy pay-as-you-go solar lighting that’s clean, reliable, and sustainable.</p>
+            <img src="https://images.unsplash.com/photo-1541417904950-b855846fe074?w=800" alt="Metro Icon" >
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Namma Metro Green Pass</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Enjoy eco-friendly urban travel. Redeem this offer for discounted fares and support clean transit on Namma Metro & other Indian city metro rail lines.</p>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
             <strong><i class="fas fa-coins"></i> 300</strong>
-            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+            <button class="btn" onclick="openRedeemModal('Namma Metro Green Pass', 300)">Redeem Now</button>
           </div>
         </div>
 
         <div class="rewards-card">
-          <img src="https://kokofuel.com/wp-content/uploads/2020/02/FUEL_3.png" alt="LPG Icon">
-          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Koko Fuel</h5>
-          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Switch to cleaner cooking with Koko Fuel and reduce carbon emissions. Redeem now and we’ll plant 10 trees in your name — cooking with purpose!</p>
+          <img src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800" alt="Solar Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Tata Power Solar Subsidies</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Empower your home with rooftop solar energy. Get discounted installation support or solar credits through Tata Power to reduce your electricity bills.</p>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
-            <strong><i class="fas fa-coins"></i> 1000</strong>
-            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+            <strong><i class="fas fa-coins"></i> 2000</strong>
+            <button class="btn" onclick="openRedeemModal('Tata Power Solar Subsidies', 2000)">Redeem Now</button>
           </div>
         </div>
 
         <div class="rewards-card">
-          <img src="https://vivaldikenya.co.ke/wp-content/uploads/2021/08/distribute2x.jpg" alt="LPG Icon">
-          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Jikokoa</h5>
-          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Save energy and protect the planet with Jikokoa’s smart stove. It’s efficient, uses less charcoal, and helps cut household carbon emissions.</p>
+          <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=800" alt="Recycling Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Swachh Bharat Utility Credits</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Earn credits to offset your municipal water and waste collection bills. Support clean city initiatives and get direct discounts in Swachh Survekshan cities.</p>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
-            <strong><i class="fas fa-coins"></i> 1500</strong>
-            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+            <strong><i class="fas fa-coins"></i> 500</strong>
+            <button class="btn" onclick="openRedeemModal('Swachh Bharat Utility Credits', 500)">Redeem Now</button>
           </div>
         </div>
 
         <div class="rewards-card">
-          <img src="https://stlight.solar/wp-content/uploads/2025/06/SK-321-BOOM-01-FRONT-BACK-02-022622-scaled-1.jpg" alt="LPG Icon">
-          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">SunKing</h5>
-          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Power your nights sustainably with SunKing solar solutions. Redeem this reward for bright, affordable lighting and a 1-ton CO₂ offset certification.</p>
+          <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800" alt="Scooter Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Ola Electric Ride Credits</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Switch to green mobility. Redeem your points for free or subsidized Ola S1 electric scooter rides and contribute to cleaner, smog-free Indian roads.</p>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
             <strong><i class="fas fa-coins"></i> 800</strong>
-            <button class="btn" onclick="openRedeemModal()">Redeem Now</button>
+            <button class="btn" onclick="openRedeemModal('Ola Electric Ride Credits', 800)">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=800" alt="Gas Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">LPG Green Refill Discount</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Save energy and reduce household carbon emissions. Get direct subsidies on your local clean LPG gas cylinder refill or cooking stove accessories.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 1000</strong>
+            <button class="btn" onclick="openRedeemModal('LPG Green Refill Discount', 1000)">Redeem Now</button>
+          </div>
+        </div>
+
+        <div class="rewards-card">
+          <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=800" alt="E-waste Icon">
+          <h5 style="padding-left: 1.5em; padding-top: 10px; font-family:Georgia, 'Times New Roman', Times, serif;">Attero E-Waste Recycler Voucher</h5>
+          <p class="muted" style="padding-bottom: 5px; padding-left: 1.5em">Recycle your old computers and smartphones. Redeem this voucher for cashbacks or shopping discounts at Croma, Reliance Digital, or other eco-partners.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem; padding-bottom: 1.2rem; padding-right: 1.5em; padding-left: 1.5em">
+            <strong><i class="fas fa-coins"></i> 1500</strong>
+            <button class="btn" onclick="openRedeemModal('Attero E-Waste Recycler Voucher', 1500)">Redeem Now</button>
           </div>
         </div>
 
@@ -556,13 +556,13 @@
               <input type="text" id="uniqueId" name="uniqueId" placeholder="Enter your unique ID" required>
 
               <label for="phone">Phone Number</label>
-              <input type="tel" id="phone" name="phone" placeholder="e.g. 07XXXXXXXX" required>
+              <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" required>
 
               <p>Select Payment Method:</p>
               <div class="payment-buttons">
-                <button type="button" class="pay-btn">Send Money</button>
-                <button type="button" class="pay-btn">Paybill</button>
-                <button type="button" class="pay-btn">Buy Goods</button>
+                <button type="button" class="pay-btn">UPI / GPay</button>
+                <button type="button" class="pay-btn">Paytm Wallet</button>
+                <button type="button" class="pay-btn">Bank Transfer</button>
               </div>
 
               <button type="submit" class="submit-btn">Confirm Redemption</button>
@@ -705,7 +705,7 @@
                   <!-- <div class="form-group">
                       <label>Personalization Preview</label>
                       <div style="padding: 1rem; background: #f3f4f6; border-radius: 8px; font-size: 0.875rem;">
-                          <strong>Sample:</strong> Hi John, your payment of Ksh 500 was successful. View: http://link.co/abc
+                          <strong>Sample:</strong> Hi John, your payment of Rs. 500 was successful. View: http://link.co/abc
                       </div>
                   </div> -->
                   
@@ -791,7 +791,7 @@
         // Use template
         function useTemplate(type) {
             const templates = {
-                payment: 'Your payment of Ksh {{amount}} has been received. Ref: {{reference}}. Thank you!',
+                payment: 'Your payment of Rs. {{amount}} has been received. Ref: {{reference}}. Thank you!',
                 order: 'Hi {{name}}, your order #{{order_id}} is being processed and will be delivered by {{date}}.',
                 otp: 'Your verification code is {{code}}. Valid for 5 minutes. Do not share.'
             };

@@ -92,9 +92,14 @@
     text-align: center;
 }
 
-nav-link:active {
-    background-color: #056D5F;
+.nav-link.active {
+    background-color: var(--primary);
     color: #fff;
+}
+
+.nav-link:hover {
+    background-color: rgba(47, 87, 138, 0.1);
+    color: var(--primary);
 }
 
 
@@ -117,6 +122,14 @@ nav-link:active {
                 </a>
             </li>
 
+            {% if request.user.profile.role == 'bank' %}
+            <li class="nav-item">
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            {% else %}
             <li class="nav-item">
                 <a href="/rewards" class="nav-link">
                     <i class="fas fa-gift"></i>
@@ -151,6 +164,7 @@ nav-link:active {
                     <span>Settings</span>
                 </a>
             </li>
+            {% endif %}
         </ul>
     </nav>
 </aside>

@@ -32,7 +32,7 @@ def autogenerate_tips_response():
         - Avoid jargon — use simple, clear language that everyone understands.
         - Optionally include a call-to-action, e.g., “Join the movement,” “Check your ZeroWave dashboard,” etc.
         - Rotate topics to maintain variety: energy saving, waste reduction, recycling, community participation, etc.
-        - Reflect African and Kenyan environmental context (local relevance preferred).
+        - Reflect Indian environmental context (local relevance preferred).
 
         Examples:
 
@@ -42,7 +42,7 @@ def autogenerate_tips_response():
 
         “Charge your EV with clean energy — small choices, big change. Go green today!”
 
-        “Your actions matter. Plant trees, save energy, earn rewards. Join ZeroWave and impact Kenya!”
+        “Your actions matter. Plant trees, save energy, earn rewards. Join ZeroWave and impact India!”
 
         “Switch off, unplug, and recharge the planet. Sustainable living starts with you.”
 
@@ -55,7 +55,7 @@ def autogenerate_tips_response():
 
 
     response = model.generate_content(
-        prompt = f"Generate a short SMS alert with tips on sustainability and green living.",
+        contents = f"Generate a short SMS alert with tips on sustainability and green living.",
         generation_config = genai.GenerationConfig(
         max_output_tokens=1000,
         temperature=1.5, 

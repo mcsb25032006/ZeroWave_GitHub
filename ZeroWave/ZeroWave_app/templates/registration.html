@@ -12,32 +12,32 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
     :root{
-      --primary: #8A9A5B;
-      --primary-glow: #A2B570;
-      --secondary: #E2725B;
+      --primary: #2F578A;
+      --primary-glow: #4a78b5;
+      --secondary: #F48F68;
       --accent: #333333;
-      --bg: #F0F8A4;
+      --bg: #FFF6DE;
       --text: #333333;
-      --muted: #6E7A5A;
+      --muted: #546E7A;
       --card: #ffffff;
       --radius: 16px;
-      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --shadow: 0 10px 30px -10px rgba(47, 87, 138, 0.15);
       --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
       --border: hsl(210 16% 92%)
     }
     [data-theme="dark"]{
-      --bg: #141811;
-      --text: #E6EAE0;
-      --muted: #9AA38F;
-      --card: #1D2219;
-      --border: #2B3326;
+      --bg: #11161d;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --card: #18222f;
+      --border: #253447;
     }
     
     [data-theme="dark"] body {
       background: var(--bg);
     }
     *{box-sizing:border-box}
-    body{margin:0;background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:1rem}
+    body{margin:0;background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:1rem}
     .wrap{position:relative;max-width:440px;width:100%;margin: 0 auto;}
     .card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;box-shadow:var(--shadow);overflow:hidden}
     [data-theme="dark"] .card{border-color:var(--border)}
@@ -66,12 +66,45 @@
       <div class="logo"><i class="fa-solid fa-leaf"></i></div>
       <h1>Join ZeroWave</h1>
       <p class="sub">Start your journey to a greener tomorrow</p>
+
+      <div id="errorMessage" style="display: none; background: rgba(244, 143, 104, 0.15); border-left: 4px solid var(--secondary); color: var(--secondary); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
+
       <form id="registrationForm" class="row">
         {% csrf_token %}
+        <div>
+          <label>Register As</label>
+          <div style="display: flex; gap: 1.5rem; margin-top: 0.35rem; margin-bottom: 0.5rem;">
+            <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+              <input type="radio" name="role" value="user" checked style="width: auto; margin: 0;" /> Individual / Household
+            </label>
+            <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+              <input type="radio" name="role" value="bank" style="width: auto; margin: 0;" /> Waste Collection Bank
+            </label>
+          </div>
+        </div>
         <div>
           <label for="fullName">Full Name</label>
           <input id="fullName" name="fullName" type="text" placeholder="Enter your full name" required />
         </div>
+        <div id="bankFields" style="display: none; border-left: 3px solid var(--primary); padding-left: 1rem; margin-bottom: 0.5rem;">
+          <div style="margin-bottom: 1rem;">
+            <label for="bankName">Bank / Department Name</label>
+            <input id="bankName" name="bankName" type="text" placeholder="e.g. Delhi Recycling Bank" />
+          </div>
+        </div>
+        <div>
+          <label for="region">Select City / Region</label>
+          <select id="region" name="region" required style="width: 100%; margin-top: .35rem; padding: .75rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: inherit; outline: none;">
+            <option value="delhi">Delhi NCR</option>
+            <option value="mumbai">Mumbai Metro</option>
+            <option value="bengaluru">Bengaluru</option>
+            <option value="hyderabad">Hyderabad</option>
+            <option value="chennai">Chennai</option>
+            <option value="kolkata">Kolkata</option>
+            <option value="pune">Pune</option>
+          </select>
+        </div>
+
         <div>
           <label for="email">Email</label>
           <input id="email" name="email" type="email" placeholder="your.email@example.com" required />
@@ -79,7 +112,6 @@
         <div>
             <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
             <div class="relative mt-1">
-                <!-- <i class="fas fa-phone absolute left-3 top-3 text-gray-400"></i> -->
                 <input id="phone" name="phone" type="tel" required class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="+1 (555) 123-4567">
             </div>
         </div>
@@ -91,10 +123,6 @@
           <label for="confirmPassword">Confirm Password</label>
           <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter your password" required />
         </div>
-        <!-- <div>
-          <label for="householdId">Household ID (Optional)</label>
-          <input id="householdId" name="householdId" type="text" placeholder="Enter household ID if available" />
-        </div> -->
         <button class="btn" type="submit">Join ZeroWave <span aria-hidden>🌿</span></button>
       </form>
       <p class="small" style="margin-top:1rem">Already have an account? <a class="link" href="{% url 'signin' %}">Sign In</a></p>
@@ -115,43 +143,92 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
+    const errDiv = document.getElementById('errorMessage');
+    const showError = (msg) => {
+      errDiv.textContent = msg;
+      errDiv.style.display = 'block';
+    };
+    const hideError = () => {
+      errDiv.style.display = 'none';
+      errDiv.textContent = '';
+    };
+
+    const roleRadios = document.querySelectorAll('input[name="role"]');
+    const bankFields = document.getElementById('bankFields');
+    const bankNameInput = document.getElementById('bankName');
+
+    roleRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'bank') {
+          bankFields.style.display = 'block';
+          bankNameInput.required = true;
+        } else {
+          bankFields.style.display = 'none';
+          bankNameInput.required = false;
+        }
+      });
+    });
+
     const registrationForm = document.getElementById('registrationForm');
     registrationForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideError();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (password !== confirmPassword) {
-        alert("Passwords do not match");
+        showError("Passwords do not match");
         return;
       }
 
+      let userCredential = null;
       try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const idToken = await userCredential.user.getIdToken();
 
-        // Send token to backend
+        const role = document.querySelector('input[name="role"]:checked').value;
+        const bankName = document.getElementById('bankName').value;
+        const region = document.getElementById('region').value;
+        const phone = document.getElementById('phone').value;
+
+        // Send token and metadata to backend
         const response = await fetch('/auth/firebase/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': '{{ csrf_token }}'
           },
-          body: JSON.stringify({ idToken: idToken })
+          body: JSON.stringify({ 
+            idToken: idToken,
+            role: role,
+            bankName: bankName,
+            region: region,
+            phone: phone
+          })
         });
 
         if (response.ok) {
           window.location.href = '/dashboard';
         } else {
-          alert("Authentication failed on server");
+          // Clean up created user in Firebase since Django creation failed
+          if (userCredential && userCredential.user) {
+            await userCredential.user.delete().catch(err => console.error("Firebase deletion failed:", err));
+          }
+          const errData = await response.json().catch(() => ({}));
+          showError("Authentication failed on server: " + (errData.message || response.statusText));
         }
       } catch (error) {
-        alert(error.message);
+        // If Firebase signup succeeded but server failed, clean up if possible
+        if (userCredential && userCredential.user) {
+          await userCredential.user.delete().catch(err => console.error("Firebase deletion failed:", err));
+        }
+        showError(error.message);
       }
     });
 
     const t=document.getElementById('themeToggle');
+
     t.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
     if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';
   </script>

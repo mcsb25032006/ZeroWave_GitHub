@@ -17,31 +17,31 @@
     
   <style>
     :root{
-      --primary: #8A9A5B;
-      --primary-glow: #A2B570;
-      --secondary: #E2725B;
+      --primary: #2F578A;
+      --primary-glow: #4a78b5;
+      --secondary: #F48F68;
       --accent: #333333;
-      --bg: #F0F8A4;
+      --bg: #FFF6DE;
       --text: #333333;
-      --muted: #6E7A5A;
+      --muted: #546E7A;
       --card: #ffffff;
       --radius: 16px;
-      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --shadow: 0 10px 30px -10px rgba(47, 87, 138, 0.15);
       --border: hsl(210 16% 92%)
     }
     [data-theme="dark"]{
-      --bg: #141811;
-      --text: #E6EAE0;
-      --muted: #9AA38F;
-      --card: #1D2219;
-      --border: #2B3326;
+      --bg: #11161d;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --card: #18222f;
+      --border: #253447;
     }
     
     [data-theme="dark"] body {
       background: var(--bg);
     }
     *{box-sizing:border-box}
-    body{margin:0;background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex}
+    body{margin:0;background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex}
     .sidebar{width:260px;min-height:100vh;border-right:1px solid var(--border);background:rgba(255,255,255,.6);backdrop-filter:saturate(180%) blur(8px);position:sticky;top:0}
     [data-theme="dark"] .sidebar{background:rgba(20,24,28,.5);border-color:var(--border)}
     .brand{display:flex;align-items:center;gap:.6rem;padding:1rem}
@@ -83,18 +83,43 @@
       <section class="card">
         <h2 style="margin-top:0">Account Information</h2>
         <div class="row">
+          {% if profile.role == 'bank' %}
+          <div>
+            <label for="bankName">Bank / Department Name</label>
+            <input id="bankName" type="text" value="{{ profile.bank_name|default:'' }}" />
+          </div>
+          {% else %}
           <div>
             <label for="fullName">Full Name</label>
-            <input id="fullName" type="text" value="User Name" />
+            <input id="fullName" type="text" value="{% if profile.user.first_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.email }}{% endif %}" />
+          </div>
+          {% endif %}
+          <div>
+            <label for="region">City / Region</label>
+            <select id="region" style="width: 100%; margin-top: .35rem; padding: .7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit;">
+              <option value="delhi" {% if profile.region == 'delhi' %}selected{% endif %}>Delhi NCR</option>
+              <option value="mumbai" {% if profile.region == 'mumbai' %}selected{% endif %}>Mumbai Metro</option>
+              <option value="bengaluru" {% if profile.region == 'bengaluru' %}selected{% endif %}>Bengaluru</option>
+              <option value="hyderabad" {% if profile.region == 'hyderabad' %}selected{% endif %}>Hyderabad</option>
+              <option value="chennai" {% if profile.region == 'chennai' %}selected{% endif %}>Chennai</option>
+              <option value="kolkata" {% if profile.region == 'kolkata' %}selected{% endif %}>Kolkata</option>
+              <option value="pune" {% if profile.region == 'pune' %}selected{% endif %}>Pune</option>
+            </select>
           </div>
           <div>
             <label for="email">Email</label>
-            <input id="email" type="email" value="user@zerowave.com" />
+            <input id="email" type="email" value="{{ profile.user.email }}" />
           </div>
           <div>
-            <label for="householdId">Household ID</label>
-            <input id="householdId" type="text" value="ZW-2026-1234" />
+            <label for="phone">Phone Number</label>
+            <input id="phone" type="text" value="{{ profile.phone_number|default:'' }}" />
           </div>
+          {% if profile.role == 'user' %}
+          <div>
+            <label for="householdId">Household ID</label>
+            <input id="householdId" type="text" value="{{ profile.household_id }}" />
+          </div>
+          {% endif %}
         </div>
       </section>
 
@@ -156,6 +181,48 @@
     if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';
     // Green Mode switch toggles theme
     document.getElementById('greenMode').addEventListener('click',function(){this.dataset.on=this.dataset.on==='true'?'false':'true';document.documentElement.dataset.theme=this.dataset.on==='true'?'dark':'';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
+
+    // Save changes handler
+    document.querySelector('button.btn:last-child').addEventListener('click', async () => {
+        const fullNameEl = document.getElementById('fullName');
+        const householdIdEl = document.getElementById('householdId');
+        const bankNameEl = document.getElementById('bankName');
+        const regionEl = document.getElementById('region');
+        
+        const fullName = fullNameEl ? fullNameEl.value.trim() : '';
+        const email = document.getElementById('email').value.trim();
+        const householdId = householdIdEl ? householdIdEl.value.trim() : '';
+        const phone = document.getElementById('phone') ? document.getElementById('phone').value.trim() : '';
+        const bankName = bankNameEl ? bankNameEl.value.trim() : '';
+        const region = regionEl ? regionEl.value : '';
+
+        try {
+            const response = await fetch('/api/settings/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    full_name: fullName,
+                    email: email,
+                    phone: phone,
+                    household_id: householdId,
+                    bank_name: bankName,
+                    region: region
+                })
+            });
+            if (response.ok) {
+                alert("✅ Settings saved successfully!");
+                window.location.reload();
+            } else {
+                const data = await response.json();
+                alert("❌ Failed to save settings: " + data.message);
+            }
+        } catch (err) {
+            alert("❌ Error connecting to server: " + err);
+        }
+    });
   </script>
 </body>
 </html>

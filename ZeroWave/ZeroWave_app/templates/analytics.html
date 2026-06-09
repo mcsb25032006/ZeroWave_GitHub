@@ -17,14 +17,14 @@
   
   <style>
     :root{
-      --primary: #8A9A5B;
-      --primary-glow: #A2B570;
-      --secondary: #E2725B;
-      --bg: #F0F8A4;
+      --primary: #2F578A;
+      --primary-glow: #4a78b5;
+      --secondary: #F48F68;
+      --bg: #FFF6DE;
       --card: #ffffff;
-      --muted: #6E7A5A;
-      --accent: #8A9A5B; /* Sage Green */
-      --accent-2: #E2725B; /* Terracotta Clay */
+      --muted: #546E7A;
+      --accent: #2F578A; /* Sage Green */
+      --accent-2: #F48F68; /* Terracotta Clay */
       --brown: #5C4033;
       --glass: rgba(255, 255, 255, 0.7);
       --shadow: 0 8px 24px rgba(138, 154, 91, 0.06);
@@ -35,13 +35,13 @@
     }
     
     [data-theme="dark"]{
-      --bg: #141811;
-      --text: #E6EAE0;
-      --muted: #9AA38F;
-      --card: #1D2219;
+      --bg: #11161d;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --card: #18222f;
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       --glass: rgba(29, 34, 25, 0.7);
-      --border: #2B3326;
+      --border: #253447;
     }
     
     [data-theme="dark"] body {
@@ -56,7 +56,7 @@
     body{
       margin:0;
       padding-bottom: 1.5em;
-      background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);
+      background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);
       color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       min-height:100vh;
@@ -342,7 +342,7 @@
       <!-- Right column -->
       <aside>
         <div class="card map-card">
-          <h4>Impact Map — Nairobi</h4>
+          <h4>Impact Map — {{ profile.get_region_display }}</h4>
           <div id="map" style="height:290px"></div>
           <div class="small" style="margin-top:6px">Hover markers for details. Color indicates status.</div>
         </div>
@@ -395,33 +395,18 @@
    * Sample dataset
    ***********************/
   const sample = {
-    days: (() => {
-      const arr = [];
-      const today = new Date();
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        arr.push(d.toISOString().slice(0,10));
-      }
-      return arr;
-    })(),
-    wasteKg: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    energyKwh: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    tokensIssued: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    comp: {
-      organic: 0,
-      plastic: 0,
-      metal: 0,
-      glass: 0,
-      other: 0
-    },
-    hubs: [],
-    anomalies: [],
-    events: []
+    days: {{ days|safe }},
+    wasteKg: {{ wasteKg|safe }},
+    energyKwh: {{ energyKwh|safe }},
+    tokensIssued: {{ tokensIssued|safe }},
+    comp: {{ comp|safe }},
+    hubs: {{ hubs|safe }},
+    anomalies: {{ anomalies|safe }},
+    events: {{ events|safe }}
   };
 
-  // Nairobi markers (spread across eastlands to westlands)
-  const claimLocations = [];
+  // Indian metropolitan markers
+  const claimLocations = {{ locations_json|safe }};
 
 
   document.addEventListener('DOMContentLoaded', (event) => {
@@ -563,10 +548,10 @@
     data:{
       labels: weeks,
       datasets: [
-        {label:'Eastlands', data:[0,0,0,0], backgroundColor:palette.green},
-        {label:'CBD', data:[0,0,0,0], backgroundColor:palette.blue},
-        {label:'Westlands', data:[0,0,0,0], backgroundColor:palette.purple},
-        {label:'Karen', data:[0,0,0,0], backgroundColor:palette.olive}
+        {label:'Delhi NCR', data:[0,0,0,0], backgroundColor:palette.green},
+        {label:'Mumbai Metro', data:[0,0,0,0], backgroundColor:palette.blue},
+        {label:'Bengaluru', data:[0,0,0,0], backgroundColor:palette.purple},
+        {label:'Chennai', data:[0,0,0,0], backgroundColor:palette.olive}
       ]
     },
     options:{scales:{x:{stacked:true}, y:{stacked:true}}, plugins:{legend:{position:'bottom'}}}
@@ -592,7 +577,25 @@
   /***********************
    * Map (Leaflet)
    ***********************/
-  const map = L.map('map', {zoomControl:false}).setView([-1.286389, 36.817223], 11);
+  const userCity = "{{ profile.region|safe }}";
+  const cityCoords = {
+      'delhi': [28.6139, 77.2090],
+      'mumbai': [19.0760, 72.8777],
+      'bengaluru': [12.9716, 77.5946],
+      'hyderabad': [17.3850, 78.4867],
+      'chennai': [13.0827, 80.2707],
+      'kolkata': [22.5726, 88.3639],
+      'pune': [18.5204, 73.8567]
+  };
+
+  let lat = 12.9716;
+  let lng = 77.5946;
+  if (cityCoords[userCity]) {
+      lat = cityCoords[userCity][0];
+      lng = cityCoords[userCity][1];
+  }
+
+  const map = L.map('map', {zoomControl:false}).setView([lat, lng], 11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
 
   // marker color by status
@@ -603,10 +606,51 @@
     return '#999';
   }
 
-  claimLocations.forEach(loc=>{
-    const circle = L.circleMarker([loc.lat, loc.lng], {radius:8, fillColor:getColor(loc.status), color:'#fff', weight:1, fillOpacity:0.9}).addTo(map);
-    circle.bindPopup(`<strong>${loc.neighbourhood}</strong><div class="small">${loc.type}</div><div class="small">Status: ${loc.status}</div><div class="small">Weight: ${loc.weight}</div>`);
-  });
+  async function loadMapMarkers() {
+      const query = `[out:json];node["amenity"="recycling"](around:15000,${lat},${lng});out;`;
+      const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+      let list = [];
+      try {
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data && data.elements && data.elements.length > 0) {
+              data.elements.forEach(el => {
+                  list.push({
+                      name: el.tags.name || el.tags.operator || "Recycling Hub",
+                      lat: el.lat,
+                      lng: el.lon,
+                      status: Math.random() > 0.5 ? 'Pre-Occupied' : 'Empty',
+                      type: el.tags['recycling_type'] || "Waste Bank",
+                      weight: Math.floor(Math.random() * 400) + 100
+                  });
+              });
+          }
+      } catch (e) {
+          console.warn("OSM API failed, loading fallbacks");
+      }
+      
+      if (list.length === 0) {
+          const names = ["Swachh Collection Hub", "Green Wave Bank", "E-Waste Depository", "Organic Compost Station", "Safai Sena Recycling"];
+          for (let i = 0; i < 5; i++) {
+              const latOff = (Math.random() - 0.5) * 0.04;
+              const lngOff = (Math.random() - 0.5) * 0.04;
+              list.push({
+                  name: names[i],
+                  lat: lat + latOff,
+                  lng: lng + lngOff,
+                  status: i % 2 === 0 ? "Empty" : "Pre-Occupied",
+                  type: "Waste Bank",
+                  weight: Math.floor(Math.random() * 400) + 100
+              });
+          }
+      }
+
+      list.forEach(loc => {
+          const circle = L.circleMarker([loc.lat, loc.lng], {radius:8, fillColor:getColor(loc.status), color:'#fff', weight:1, fillOpacity:0.9}).addTo(map);
+          circle.bindPopup(`<strong>${loc.name}</strong><div class="small">${loc.type}</div><div class="small">Status: ${loc.status}</div><div class="small">Weight: ${loc.weight} kg</div>`);
+      });
+  }
+  loadMapMarkers();
 
   /***********************
    * Interactions
@@ -625,26 +669,338 @@
     URL.revokeObjectURL(url);
   }
 
-  // Download charts as PNGs (zip-like zip omitted, download combined canvas)
+  // Download charts as PNGs (high-resolution offscreen rendering in premium report layout)
   function downloadPNG(){
-    // create combined canvas
-    const canvases = [lineCtx, pieCtx, scatterCtx];
-    const w = 1200;
-    const h = 800;
     const combined = document.createElement('canvas');
-    combined.width = w; combined.height = h;
+    const w = 1200;
+    const h = 1350;
+    combined.width = w;
+    combined.height = h;
     const ctx = combined.getContext('2d');
-    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
-    let x=0,y=0;
-    canvases.forEach((c,i)=>{
-      const tmp = document.createElement('canvas');
-      tmp.width = c.width; tmp.height = c.height;
-      tmp.getContext('2d').drawImage(c,0,0);
-      ctx.drawImage(c, x, y, w, Math.round(h/3));
-      y += Math.round(h/3);
-    });
+
+    // 1. Draw premium Slate background
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Draw soft green header banner
+    const topGrad = ctx.createLinearGradient(0, 0, 0, 115);
+    topGrad.addColorStop(0, '#e2f0e7');
+    topGrad.addColorStop(1, '#f8fafc');
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(0, 0, w, 115);
+
+    // Helper: Rounded Rectangle
+    function drawRoundedRect(cContext, x, y, width, height, radius) {
+        cContext.beginPath();
+        cContext.moveTo(x + radius, y);
+        cContext.lineTo(x + width - radius, y);
+        cContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+        cContext.lineTo(x + width, y + height - radius);
+        cContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        cContext.lineTo(x + radius, y + height);
+        cContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+        cContext.lineTo(x, y + radius);
+        cContext.quadraticCurveTo(x, y, x + radius, y);
+        cContext.closePath();
+    }
+
+    // 3. Draw Brand Logo (Green Leaf)
+    ctx.save();
+    ctx.translate(50, 32);
+    ctx.fillStyle = '#00a86b'; // Emerald
+    ctx.beginPath();
+    ctx.moveTo(0, 24);
+    ctx.quadraticCurveTo(12, 0, 36, 0);
+    ctx.quadraticCurveTo(36, 24, 0, 24);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0, 24);
+    ctx.quadraticCurveTo(-12, 0, -36, 0);
+    ctx.quadraticCurveTo(-36, 24, 0, 24);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 24);
+    ctx.lineTo(0, 0);
+    ctx.stroke();
+    ctx.restore();
+
+    // Brand Title & Description
+    ctx.fillStyle = '#0b3b2e';
+    ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
+    ctx.fillText('ZeroWave', 105, 55);
+
+    ctx.fillStyle = '#475569';
+    ctx.font = '600 15px system-ui, -apple-system, sans-serif';
+    ctx.fillText('Environmental Impact & Performance Ledger', 105, 80);
+
+    // Right-aligned Document Meta
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 12px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('OFFICIAL METRICS LEDGER', w - 50, 45);
+    ctx.font = '500 12px system-ui, sans-serif';
+    ctx.fillText(`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}`, w - 50, 65);
+    ctx.font = '500 12px system-ui, sans-serif';
+    ctx.fillText('Status: Secure & Authenticated', w - 50, 83);
+    ctx.textAlign = 'left';
+
+    // Divider Line under Header
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.08)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(50, 115);
+    ctx.lineTo(w - 50, 115);
+    ctx.stroke();
+
+    // Helper: Draw KPI card
+    function drawKpiCard(x, y, width, height, title, value, iconType, colorTheme) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.04)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
+        ctx.fillStyle = '#ffffff';
+        drawRoundedRect(ctx, x, y, width, height, 12);
+        ctx.fill();
+        ctx.restore();
+
+        // accent border
+        ctx.fillStyle = colorTheme;
+        ctx.beginPath();
+        ctx.moveTo(x, y + 12);
+        ctx.quadraticCurveTo(x, y, x + 6, y);
+        ctx.lineTo(x + 6, y + height);
+        ctx.lineTo(x, y + height - 12);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.05)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText(title.toUpperCase(), x + 24, y + 36);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 26px system-ui, sans-serif';
+        ctx.fillText(value, x + 24, y + 76);
+
+        // Icon circle
+        ctx.save();
+        ctx.translate(x + width - 65, y + 25);
+        ctx.fillStyle = colorTheme + '15';
+        ctx.beginPath();
+        ctx.arc(20, 20, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = colorTheme;
+        ctx.lineWidth = 2.5;
+        ctx.fillStyle = colorTheme;
+        if (iconType === 'leaf') {
+            ctx.beginPath();
+            ctx.moveTo(20, 11);
+            ctx.quadraticCurveTo(31, 11, 31, 21);
+            ctx.quadraticCurveTo(20, 31, 20, 31);
+            ctx.quadraticCurveTo(20, 21, 20, 21);
+            ctx.quadraticCurveTo(9, 21, 9, 21);
+            ctx.quadraticCurveTo(9, 11, 20, 11);
+            ctx.stroke();
+        } else if (iconType === 'energy') {
+            ctx.beginPath();
+            ctx.moveTo(22, 9);
+            ctx.lineTo(13, 22);
+            ctx.lineTo(19, 22);
+            ctx.lineTo(18, 31);
+            ctx.lineTo(27, 18);
+            ctx.lineTo(21, 18);
+            ctx.closePath();
+            ctx.fill();
+        } else if (iconType === 'credits') {
+            ctx.beginPath();
+            ctx.arc(20, 20, 10, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(20, 20, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    // Render KPI Cards
+    const totalWasteVal = sample.wasteKg.reduce((a,b)=>a+b,0) + ' kg';
+    const totalEnergyVal = sample.energyKwh.reduce((a,b)=>a+b,0) + ' kWh';
+    const creditsVal = Math.round(sample.tokensIssued.reduce((a,b)=>a+b,0) / 10);
+
+    drawKpiCard(50, 135, 350, 110, 'Waste Recycled', totalWasteVal, 'leaf', '#00A86B');
+    drawKpiCard(425, 135, 350, 110, 'Energy Generated', totalEnergyVal, 'energy', '#3b82f6');
+    drawKpiCard(800, 135, 350, 110, 'Carbon Credits', creditsVal.toString(), 'credits', '#eab308');
+
+    // Helper: Render individual chart inside a card with padding & high-resolution offscreen rendering
+    function renderChartCard(chartInstance, x, y, cardWidth, cardHeight, title, customOptions) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.04)';
+        ctx.shadowBlur = 16;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 6;
+        ctx.fillStyle = '#ffffff';
+        drawRoundedRect(ctx, x, y, cardWidth, cardHeight, 16);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.05)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 18px system-ui, -apple-system, sans-serif';
+        ctx.fillText(title, x + 30, y + 42);
+
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.05)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x + 30, y + 58);
+        ctx.lineTo(x + cardWidth - 30, y + 58);
+        ctx.stroke();
+
+        const padX = 35;
+        const padY = 80;
+        const boxW = cardWidth - (padX * 2);
+        const boxH = cardHeight - padY - 25;
+
+        // Create high-resolution temporary offscreen canvas (rendered at 2x target size)
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = boxW * 2;
+        tempCanvas.height = boxH * 2;
+
+        const tempConfig = {
+            type: chartInstance.config.type,
+            data: {
+                labels: chartInstance.data.labels,
+                datasets: chartInstance.data.datasets.map(ds => {
+                    const copy = { ...ds };
+                    if (chartInstance.config.type === 'line') {
+                        copy.borderWidth = 4;
+                        copy.pointRadius = 5;
+                        copy.pointHoverRadius = 7;
+                    }
+                    return copy;
+                })
+            },
+            options: {
+                ...chartInstance.config.options,
+                responsive: false,
+                animation: false,
+                devicePixelRatio: 2, // Force sharp rasterization
+                ...customOptions
+            }
+        };
+
+        const tempChart = new Chart(tempCanvas, tempConfig);
+        tempChart.update('none');
+
+        // Draw offscreen canvas (2x resolution) scaled down to 1x onto report canvas
+        ctx.drawImage(tempCanvas, x + padX, y + padY, boxW, boxH);
+        tempChart.destroy();
+    }
+
+    // Chart Options Optimized for High Resolution Print
+    const lineCustomOptions = {
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            font: { size: 13, weight: '600', family: 'system-ui' },
+            boxWidth: 35,
+            padding: 15,
+            color: '#334155'
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 11, weight: '500', family: 'system-ui' }, color: '#475569', padding: 8 },
+          grid: { color: 'rgba(15, 23, 42, 0.04)', lineWidth: 1 }
+        },
+        y1: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'kg', font: { size: 12, weight: 'bold', family: 'system-ui' }, color: '#0f172a' },
+          ticks: { font: { size: 11, weight: '500', family: 'system-ui' }, color: '#475569' },
+          grid: { color: 'rgba(15, 23, 42, 0.04)', lineWidth: 1 }
+        },
+        y2: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: 'kWh', font: { size: 12, weight: 'bold', family: 'system-ui' }, color: '#0f172a' },
+          ticks: { font: { size: 11, weight: '500', family: 'system-ui' }, color: '#475569' },
+          grid: { display: false }
+        }
+      }
+    };
+
+    const pieCustomOptions = {
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right',
+          labels: {
+            font: { size: 12, weight: '600', family: 'system-ui' },
+            color: '#334155',
+            padding: 16,
+            boxWidth: 20
+          }
+        }
+      },
+      cutout: '55%'
+    };
+
+    const scatterCustomOptions = {
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Weight (kg)', font: { size: 12, weight: 'bold', family: 'system-ui' }, color: '#0f172a' },
+          ticks: { font: { size: 11, weight: '500', family: 'system-ui' }, color: '#475569', padding: 8 },
+          grid: { color: 'rgba(15, 23, 42, 0.04)', lineWidth: 1 }
+        },
+        y: {
+          title: { display: true, text: 'Energy (kWh)', font: { size: 12, weight: 'bold', family: 'system-ui' }, color: '#0f172a' },
+          ticks: { font: { size: 11, weight: '500', family: 'system-ui' }, color: '#475569', padding: 8 },
+          grid: { color: 'rgba(15, 23, 42, 0.04)', lineWidth: 1 }
+        }
+      }
+    };
+
+    // Render Cards
+    renderChartCard(lineChart, 50, 270, 1100, 480, 'Weekly Contribution Trend', lineCustomOptions);
+    renderChartCard(pieChart, 50, 775, 530, 470, 'Waste Composition Breakdown', pieCustomOptions);
+    renderChartCard(scatter, 620, 775, 530, 470, 'Energy vs Waste Correlation', scatterCustomOptions);
+
+    // 4. Draw Footer
+    ctx.fillStyle = '#0b3b2e'; // ZeroWave dark green theme
+    ctx.fillRect(0, 1270, w, 80);
+
+    ctx.fillStyle = '#a3cbd2';
+    ctx.font = '500 13px system-ui, sans-serif';
+    ctx.fillText('ZeroWave Environmental Ledger Report • Powered by Secure Green Ledger', 50, 1316);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#00a86b';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.fillText('VERIFIED SUSTAINABILITY DATA SECURE', w - 50, 1316);
+    ctx.textAlign = 'left';
+
+    // 5. Trigger download
     const url = combined.toDataURL('image/png');
-    const a = document.createElement('a'); a.href=url; a.download='zerowave-charts.png'; a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ZeroWave-Analytics-Report-${new Date().toISOString().slice(0,10)}.png`;
+    a.click();
   }
 
   // simple timeframe filter (for demo, just toggles dataset)

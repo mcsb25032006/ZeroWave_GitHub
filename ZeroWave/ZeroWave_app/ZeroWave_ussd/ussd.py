@@ -4,7 +4,10 @@ from flask import Flask, request
 
 from dotenv import load_dotenv
 
-sys.path.insert(1, '/ussd_response')
+# Resolve absolute paths so it can be imported from tests or run directly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
 from ussd_response.ai_response import autogenerate_tips_response
 from ussd_response.sms_resposne import send_message
@@ -13,7 +16,7 @@ app = Flask(__name__)
 
 @app.route("/ussd", methods = ['POST'])
 def ussd():
-  # Read the variables sent via POST from our API
+  # Read the variables sent via POST from the API
   session_id   = request.values.get("sessionId", None)
   serviceCode  = request.values.get("serviceCode", None)
   phone_number = request.values.get("phoneNumber", None)
@@ -22,7 +25,7 @@ def ussd():
   # user_response = text.split('*')
 
   if text      == '':
-      # This is the first request. Note how we start the response with CON
+      # This is the first request. Note how I start the response with CON
       response  = "CON Welcome to ZeroWave, Turning Waste to Energy \n"
       response += "1. Register \n"
       response += "2. ZeroTokens \n"
@@ -57,7 +60,7 @@ def ussd():
 
 
   elif text    == '4':
-      response = "END ZeroWave Waste stations are located at www.zerowave.co.ke/stations"
+      response = "END ZeroWave Waste stations are located at www.zerowave.in/stations"
 
 
 
@@ -75,7 +78,7 @@ def ussd():
 
 
   elif text    == '7':
-    response = "END Transform your waste into valuable energy and earn rewards while saving the planet. Join the Sustainability Revolution. \nVisit www.zerowave.co.ke"
+    response = "END Transform your waste into valuable energy and earn rewards while saving the planet. Join the Sustainability Revolution. \nVisit www.zerowave.in"
 
 
   # Send the response back to the API

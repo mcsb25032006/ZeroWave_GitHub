@@ -15,25 +15,25 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --primary: #8A9A5B;
-      --primary-glow: #A2B570;
-      --secondary: #E2725B;
+      --primary: #2F578A;
+      --primary-glow: #4a78b5;
+      --secondary: #F48F68;
       --accent: #333333;
-      --bg: #F0F8A4;
+      --bg: #FFF6DE;
       --text: #333333;
-      --muted: #6E7A5A;
+      --muted: #546E7A;
       --card: #ffffff;
       --radius: 16px;
-      --shadow: 0 10px 30px -10px rgba(138, 154, 91, 0.15);
+      --shadow: 0 10px 30px -10px rgba(47, 87, 138, 0.15);
       --border: hsl(210 16% 92%);
     }
     
     [data-theme="dark"]{
-      --bg: #141811;
-      --text: #E6EAE0;
-      --muted: #9AA38F;
-      --card: #1D2219;
-      --border: #2B3326;
+      --bg: #11161d;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --card: #18222f;
+      --border: #253447;
     }
     
     [data-theme="dark"] body {
@@ -46,7 +46,7 @@
     
     body{
       margin:0;
-      background: linear-gradient(135deg, #FAFDF3 0%, #F0F8A4 100%);
+      background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);
       color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       min-height:100vh;
@@ -383,13 +383,27 @@
     </div>
     <main style="padding:1.25rem;">
       
+      <!-- Member ID Banner -->
+      <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--card) 0%, rgba(47, 87, 138, 0.05) 100%);">
+        <div>
+          <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Welcome back, {% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}{{ profile.user.username }}{% endif %}!</h3>
+          <p class="muted" style="margin: 0.25rem 0 0; font-size: 0.9rem;">Show your Member ID when dropping off waste at collection points to earn ZeroTokens.</p>
+        </div>
+        <div style="background: rgba(47, 87, 138, 0.15); padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--primary); display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-weight: 700; font-family: monospace; font-size: 1.1rem; letter-spacing: 0.5px;">{{ profile.household_id }}</span>
+          <button onclick="navigator.clipboard.writeText('{{ profile.household_id }}'); alert('Copied Member ID!');" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 1rem;" title="Copy Member ID">
+            <i class="far fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      
       <!-- Stats Grid -->
       <div class="stats-grid">
           <div class="stat-card">
               <div class="stat-header">
                   <div>
                       <div class="stat-label">Waste Recycled</div>
-                      <div class="stat-value">0.0 Kgs</div>
+                      <div class="stat-value">{{ profile.total_waste_recycled }} Kgs</div>
                       <div class="stat-change">
                           <i class="fas fa-arrow-up"></i> +0% from last month
                       </div>
@@ -404,7 +418,7 @@
               <div class="stat-header">
                   <div>
                       <div class="stat-label">Energy Generated</div>
-                      <div class="stat-value">0 kWh</div>
+                      <div class="stat-value">{{ profile.total_energy_generated }} kWh</div>
                       <div class="stat-change">
                           <i class="fas fa-arrow-up"></i> +0% this week
                       </div>
@@ -419,7 +433,7 @@
               <div class="stat-header">
                   <div>
                       <div class="stat-label">Carbon Credits</div>
-                      <div class="stat-value">0</div>
+                      <div class="stat-value">{{ profile.carbon_credits }}</div>
                       <div class="stat-change">
                           <i class="fas fa-arrow-up"></i> +0% improvement
                       </div>
@@ -434,7 +448,7 @@
               <div class="stat-header">
                   <div>
                       <div class="stat-label">ZeroTokens</div>
-                      <div class="stat-value">0</div>
+                      <div class="stat-value">{{ profile.tokens_balance }}</div>
                       <div class="stat-change">
                           <i class="fas fa-arrow-up"></i> +0% vs last month
                       </div>
@@ -477,29 +491,90 @@
 
       
 
-      <!-- Recent Activity -->
-      <div class="card">
-          <div class="card-header">
-              <h3 class="card-title">Recent Activity</h3>
+      <!-- Grid for Activity & Requirements -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+          
+          <!-- Recent Activity -->
+          <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                  <h3 class="card-title">Recent Activity</h3>
+              </div>
+              <div class="table-container">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Date</th>
+                          <th>Action</th>
+                          <th>Tokens</th>
+                          <th>Status</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for act in activities %}
+                      <tr>
+                          <td>{{ act.date }}</td>
+                          <td>
+                              <strong>{{ act.action }}</strong>
+                              <div class="muted" style="font-size: 0.8rem;">Category: {{ act.category }}</div>
+                          </td>
+                          <td><strong>{{ act.tokens }}</strong></td>
+                          <td>
+                              <span class="badge {% if act.status == 'success' %}success{% else %}warning{% endif %}">
+                                  {{ act.status|title }}
+                              </span>
+                          </td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="4" style="text-align: center; color: var(--muted); padding: 2rem;">No recent activity. Keep recycling to start earning!</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+              </div>
           </div>
-          <div class="table-container">
-          <table>
-              <thead>
-                  <tr>
-                      <th>Date</th>
-                      <th>Action</th>
-                      <th>Category</th>
-                      <th>Tokens</th>
-                      <th>Status</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td colspan="5" style="text-align: center; color: var(--muted); padding: 2rem;">No recent activity. Keep recycling to start earning!</td>
-                  </tr>
-              </tbody>
-          </table>
+          
+          <!-- Active Waste Requirements -->
+          <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-clipboard-list text-primary"></i> Active Waste Requirements</h3>
+              </div>
+              <div class="table-container">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Bank Details</th>
+                          <th>Category</th>
+                          <th>Rate</th>
+                          <th>Progress</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for req in active_requirements %}
+                      <tr>
+                          <td>
+                              <strong>{{ req.bank.profile.bank_name|default:req.bank.username }}</strong>
+                              <div class="muted" style="font-size: 0.8rem;">Region: {{ req.bank.profile.region|upper }}</div>
+                          </td>
+                          <td><span class="badge info">{{ req.get_category_display }}</span></td>
+                          <td><strong style="color: var(--primary);">{{ req.tokens_per_kg }} tokens/kg</strong></td>
+                          <td>
+                              <div class="muted" style="font-size: 0.8rem;">{{ req.quantity_collected|floatformat:0 }} / {{ req.quantity_required|floatformat:0 }} kg</div>
+                              <div class="progress" style="height: 6px; margin-top: 3px;">
+                                  <span style="width: {{ req.percentage_collected }}%;"></span>
+                              </div>
+                          </td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="4" style="text-align: center; color: var(--muted); padding: 2rem;">No active requirements from waste banks right now. Check back later!</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+              </div>
           </div>
+          
       </div>
 
       <!-- Charts -->
@@ -527,6 +602,106 @@
                   <canvas id="fraudChart"></canvas>
               </div>
           </div>
+      </div>
+
+      <!-- Pickup Request Section -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+          
+          <!-- Raise Pickup Ticket -->
+          <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-truck text-primary"></i> Request Waste Pickup</h3>
+              </div>
+              <form id="pickupTicketForm" onsubmit="event.preventDefault();" style="margin-top: 1rem;">
+                  <div style="margin-bottom: 1rem;">
+                      <label for="ticketCategory" style="font-weight: 600; font-size: 0.95rem;">Waste Category</label>
+                      <select id="ticketCategory" style="width: 100%; padding: 0.7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;">
+                          {% for cat_val, cat_name in categories %}
+                          <option value="{{ cat_val }}">{{ cat_name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <div style="margin-bottom: 1rem;">
+                      <label for="ticketWeight" style="font-weight: 600; font-size: 0.95rem;">Estimated Weight (in Kgs)</label>
+                      <input id="ticketWeight" type="number" step="0.1" min="0.1" placeholder="e.g. 15.5" required style="width: 100%; padding: 0.7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;" />
+                  </div>
+                  <div style="margin-bottom: 1rem;">
+                      <label for="ticketRegion" style="font-weight: 600; font-size: 0.95rem;">Your City / Region</label>
+                      <select id="ticketRegion" style="width: 100%; padding: 0.7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;">
+                          {% for reg_val, reg_name in regions %}
+                          <option value="{{ reg_val }}">{{ reg_name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <div style="margin-bottom: 1rem;">
+                      <label for="ticketAddress" style="font-weight: 600; font-size: 0.95rem;">Pickup Address</label>
+                      <textarea id="ticketAddress" rows="2" placeholder="Street name, Apartment details..." required style="width: 100%; padding: 0.7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem; font-family: inherit; resize: none;"></textarea>
+                  </div>
+                  <div style="margin-bottom: 1rem;">
+                      <label for="ticketPhone" style="font-weight: 600; font-size: 0.95rem;">Contact Phone Number</label>
+                      <input id="ticketPhone" type="text" value="{{ profile.phone_number|default:'' }}" placeholder="e.g. 0712345678" required style="width: 100%; padding: 0.7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;" />
+                  </div>
+                  <button type="submit" id="btnSubmitTicket" class="btn" style="width: 100%; padding: 0.75rem; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: white; border: 0; font-weight: 600; cursor: pointer; box-shadow: var(--shadow);">
+                      <i class="fas fa-paper-plane"></i> Raise Pickup Request
+                  </button>
+              </form>
+          </div>
+          
+          <!-- Your Tickets Status -->
+          <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+              <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-clock text-primary"></i> Pickup Request Status</h3>
+              </div>
+              <div class="table-container" style="flex: 1; margin-top: 1rem;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                      <thead>
+                          <tr>
+                              <th style="font-size: 0.85rem; padding-bottom: 0.5rem;">Ticket Info</th>
+                              <th style="font-size: 0.85rem; padding-bottom: 0.5rem;">Status</th>
+                              <th style="font-size: 0.85rem; padding-bottom: 0.5rem;">Collector</th>
+                              <th style="font-size: 0.85rem; padding-bottom: 0.5rem;">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody id="ticketListBody">
+                          {% for ticket in tickets %}
+                          <tr id="ticket-row-{{ ticket.id }}">
+                              <td>
+                                  <div style="font-weight: 600;">{{ ticket.get_category_display }}</div>
+                                  <div class="muted" style="font-size: 0.8rem;">Est. Weight: {{ ticket.estimated_weight }} kg</div>
+                                  <div class="muted" style="font-size: 0.8rem;">{{ ticket.created_at|date:"Y-m-d" }}</div>
+                              </td>
+                              <td>
+                                  <span class="badge {% if ticket.status == 'pending' %}warning{% elif ticket.status == 'assigned' %}info{% elif ticket.status == 'completed' %}success{% else %}danger{% endif %}">
+                                      {{ ticket.get_status_display }}
+                                  </span>
+                              </td>
+                              <td style="font-size: 0.9rem;">
+                                  {% if ticket.assigned_bank %}
+                                      {{ ticket.assigned_bank.profile.bank_name|default:ticket.assigned_bank.username }}
+                                  {% else %}
+                                      <span class="muted">Awaiting Claim</span>
+                                  {% endif %}
+                              </td>
+                              <td>
+                                  {% if ticket.status == 'pending' or ticket.status == 'assigned' %}
+                                  <button onclick="cancelTicket({{ ticket.id }})" class="btn" style="padding: 0.4rem 0.6rem; font-size: 0.75rem; background: linear-gradient(135deg, var(--secondary), #d9534f); color: white; border: 0; border-radius: 8px; cursor: pointer;">
+                                      Cancel
+                                  </button>
+                                  {% else %}
+                                  <span class="muted">-</span>
+                                  {% endif %}
+                              </td>
+                          </tr>
+                          {% empty %}
+                          <tr>
+                              <td colspan="4" style="text-align: center; color: var(--muted); padding: 2rem;">You have not raised any pickup requests yet.</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+          
       </div>
 
       <!-- Quick Actions -->
@@ -580,24 +755,30 @@
     const monthlyChart = new Chart(monthlyCtx, {
         type: 'bar',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: {{ months_labels|safe }},
             datasets: [
                 {
                     label: 'Organic',
-                    data: [0, 0, 0, 0, 0, 0],
+                    data: {{ organic_data|safe }},
                     backgroundColor: '#10b981',
                     borderRadius: 4
                 },
                 {
                     label: 'E-waste',
-                    data: [0, 0, 0, 0, 0, 0],
+                    data: {{ ewaste_data|safe }},
                     backgroundColor: '#ef4444',
                     borderRadius: 4
                 },
                 {
                     label: 'Recyclables',
-                    data: [0, 0, 0, 0, 0, 0],
+                    data: {{ recyclables_data|safe }},
                     backgroundColor: '#f59e0b',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Agriculture',
+                    data: {{ agriculture_data|safe }},
+                    backgroundColor: '#06b6d4',
                     borderRadius: 4
                 }
             ]
@@ -633,7 +814,7 @@
         data: {
             labels: ['Organic', 'E-waste', 'Recyclabes', 'Agricultural'],
             datasets: [{
-                data: [0, 0, 0, 0],
+                data: {{ pie_data|safe }},
                 backgroundColor: ['#10b981', '#f97316', '#eab308', '#06b6d4'],
                 borderWidth: 0
             }]
@@ -648,6 +829,73 @@
             }
         }
     });
+    // Raise Pickup Request Ticket
+    const btnSubmitTicket = document.getElementById('btnSubmitTicket');
+    if (btnSubmitTicket) {
+      document.getElementById('pickupTicketForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const category = document.getElementById('ticketCategory').value;
+        const weight = parseFloat(document.getElementById('ticketWeight').value) || 0;
+        const region = document.getElementById('ticketRegion').value;
+        const address = document.getElementById('ticketAddress').value;
+        const phone = document.getElementById('ticketPhone').value;
+
+        if (weight <= 0) {
+          alert("Please enter a valid estimated weight.");
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/tickets/create/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+              category: category,
+              estimated_weight: weight,
+              region: region,
+              address: address,
+              phone_number: phone
+            })
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            alert("✅ Pickup request ticket raised successfully!");
+            window.location.reload();
+          } else {
+            alert("❌ Failed to raise request: " + data.message);
+          }
+        } catch (err) {
+          alert("Error connecting to server: " + err);
+        }
+      });
+    }
+
+    window.cancelTicket = async (ticketId) => {
+      if (!confirm("Are you sure you want to cancel this pickup request?")) return;
+
+      try {
+        const response = await fetch(`/api/tickets/cancel/${ticketId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          }
+        });
+
+        if (response.ok) {
+          alert("🗑️ Request cancelled successfully!");
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert("❌ Cancellation failed: " + data.message);
+        }
+      } catch (err) {
+        alert("Error connecting to server: " + err);
+      }
+    };
   </script>
 </body>
 </html>

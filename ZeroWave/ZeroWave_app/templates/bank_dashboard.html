@@ -1,0 +1,934 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bank Dashboard | ZeroWave</title>
+  <meta name="description" content="Manage waste requirements, verify member IDs, and distribute reward tokens." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --primary: #2F578A;
+      --primary-glow: #4a78b5;
+      --secondary: #F48F68;
+      --accent: #333333;
+      --bg: #FFF6DE;
+      --text: #333333;
+      --muted: #546E7A;
+      --card: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px -10px rgba(47, 87, 138, 0.15);
+      --border: hsl(210 16% 92%);
+      --success: #10b981;
+    }
+    
+    [data-theme="dark"]{
+      --bg: #11161d;
+      --text: #F5F6F8;
+      --muted: #8ba2be;
+      --card: #18222f;
+      --border: #253447;
+    }
+    
+    [data-theme="dark"] body {
+      background: var(--bg);
+    }
+    
+    *{
+      box-sizing:border-box;
+    }
+    
+    body{
+      margin:0;
+      background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      min-height:100vh;
+      display:flex;
+    }
+    
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:1rem 1.25rem;
+      border-bottom:1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .menu-toggle {
+        display: block;
+      }
+      body {
+        flex-direction: column;
+      }
+      .main {
+        margin-left: 0;
+      }
+    }
+
+    [data-theme="dark"] .topbar{
+      border-color:hsl(210 10% 20%);
+    }
+
+    .theme{
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      padding:.5rem;
+      border-radius:10px;
+      cursor:pointer;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .grid-2-custom {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media(min-width: 992px) {
+      .grid-2-custom {
+        grid-template-columns: 1.2fr 1fr;
+      }
+    }
+    
+    .stat-card {
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .stat-icon.primary { background: rgba(47, 87, 138, 0.15); color: var(--primary); }
+    .stat-icon.accent { background: rgba(244, 143, 104, 0.15); color: var(--secondary); }
+    .stat-icon.success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: 0;
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: opacity 0.2s;
+    }
+    
+    .btn:hover {
+      opacity: 0.9;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #bbb, #999);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, var(--secondary), #d9534f);
+    }
+    
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .badge.success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .badge.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .badge.info { background: rgba(54, 162, 235, 0.1); color: #36a2eb; }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+    
+    th {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 2px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    td {
+      padding: 1rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.25rem;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    
+    /* Alert style notifications */
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .alert-success { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .alert-danger { background: rgba(244, 143, 104, 0.15); color: var(--secondary); border: 1px solid rgba(226, 114, 91, 0.3); }
+  </style>
+</head>
+<body>
+  
+  {% include 'sidebar.html' %}
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h1 style="margin:0;font-family:Poppins,Inter,sans-serif">{{ profile.bank_name|default:"Waste Bank" }}</h1>
+          <p class="muted" style="margin:.25rem 0 0">Waste Collection Department Dashboard (Region: {{ profile.region|upper }})</p>
+        </div>
+      </div>
+      <button id="themeToggle" class="theme" aria-label="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    </div>
+
+    <main style="padding:1.25rem;">
+      
+      <!-- Alert Box -->
+      <div id="mainAlert" class="alert"></div>
+
+      <!-- Stats Grid -->
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-label">Total Waste Collected</div>
+              <div class="stat-value" id="statCollected">{{ total_collected|floatformat:1 }} Kgs</div>
+            </div>
+            <div class="stat-icon primary">
+              <i class="fas fa-recycle"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-label">Active Requirements</div>
+              <div class="stat-value" id="statReqs">{{ active_req_count }}</div>
+            </div>
+            <div class="stat-icon accent">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-label">Tokens Distributed</div>
+              <div class="stat-value" id="statTokens">{{ total_tokens_issued }}</div>
+            </div>
+            <div class="stat-icon success">
+              <i class="fas fa-leaf"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Grid -->
+      <div class="grid-2-custom">
+        
+        <!-- Record Waste Dropoff -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user-check" style="color: var(--primary)"></i>
+              Verify User & Reward Drop-off
+            </h3>
+          </div>
+          
+          <div class="form-group" style="display: flex; gap: 0.5rem; align-items: flex-end;">
+            <div style="flex: 1;">
+              <label for="memberIdInput">Enter User Member ID</label>
+              <input type="text" id="memberIdInput" placeholder="e.g. ZW-2026-1234" />
+            </div>
+            <button class="btn" id="btnVerifyMember" style="height: 46px;"><i class="fas fa-search"></i> Verify</button>
+          </div>
+
+          <!-- User Details Block -->
+          <div id="userDetails" style="display: none; background: rgba(47, 87, 138, 0.08); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1.25rem;">
+            <h4 style="margin: 0 0 0.5rem; font-size: 1rem; color: var(--primary);">Verified Member Details</h4>
+            <div style="font-size: 0.9rem; line-height: 1.5;">
+              <div><strong>Name:</strong> <span id="valName">-</span></div>
+              <div><strong>Email:</strong> <span id="valEmail">-</span></div>
+              <div><strong>Phone:</strong> <span id="valPhone">-</span></div>
+            </div>
+          </div>
+
+          <!-- Log Drop-off Form (Disabled until user verified) -->
+          <div id="dropoffForm" style="opacity: 0.5; pointer-events: none;">
+            <div class="form-group">
+              <label for="dropoffCategory">Waste Category</label>
+              <select id="dropoffCategory">
+                {% for cat_val, cat_name in categories %}
+                  <option value="{{ cat_val }}">{{ cat_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="dropoffWeight">Weight (in Kgs)</label>
+              <input type="number" id="dropoffWeight" step="0.1" min="0.1" placeholder="Enter weight in kg" />
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.08); padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.95rem; font-weight: 600; display: flex; justify-content: space-between;">
+              <span>Estimated ZeroTokens:</span>
+              <span id="calculatedTokens" style="color: #10b981;">0</span>
+            </div>
+
+            <button class="btn" id="btnSubmitDropoff" style="width: 100%;"><i class="fas fa-coins"></i> Confirm Dropoff & Issue Tokens</button>
+          </div>
+        </div>
+
+        <!-- Requirements Manager -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-plus-circle" style="color: var(--primary)"></i>
+              Post Waste Requirement
+            </h3>
+          </div>
+          
+          <form id="requirementForm" onsubmit="event.preventDefault();">
+            <div class="form-group">
+              <label for="reqCategory">Waste Category</label>
+              <select id="reqCategory">
+                {% for cat_val, cat_name in categories %}
+                  <option value="{{ cat_val }}">{{ cat_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="reqQuantity">Target Quantity (in Kgs)</label>
+              <input type="number" id="reqQuantity" step="1" min="1" placeholder="e.g. 100" required />
+            </div>
+
+            <div class="form-group">
+              <label for="reqRate">Tokens Reward Rate (per Kg)</label>
+              <input type="number" id="reqRate" step="1" min="1" value="15" placeholder="e.g. 15" required />
+            </div>
+
+            <button class="btn" id="btnPostReq" style="width: 100%;"><i class="fas fa-paper-plane"></i> Publish Requirement</button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Active Requirements List -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list-check" style="color: var(--primary)"></i> Current Waste Requirements</h3>
+        </div>
+        <div class="table-container">
+          <table id="requirementsTable">
+            <thead>
+              <tr>
+                <th>Waste Category</th>
+                <th>Target Quantity</th>
+                <th>Collected Quantity</th>
+                <th>Reward Rate (Tokens/Kg)</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in requirements %}
+              <tr id="req-row-{{ req.id }}">
+                <td><strong>{{ req.get_category_display }}</strong></td>
+                <td>{{ req.quantity_required }} kg</td>
+                <td>
+                  {{ req.quantity_collected }} kg
+                  <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: {{ req.percentage_collected }}%;"></div>
+                  </div>
+                </td>
+                <td>{{ req.tokens_per_kg }} tokens/kg</td>
+                <td>
+                  <span class="badge {% if req.status == 'Active' %}success{% else %}warning{% endif %}">
+                    {{ req.status }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-danger" onclick="deleteRequirement({{ req.id }})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                    <i class="fas fa-trash-alt"></i> Remove
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr id="noReqsRow">
+                <td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">No active requirements published. Add one above!</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pickup Tickets Management Section -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+        
+        <!-- Nearby Available Tickets -->
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-search-location" style="color: var(--primary)"></i> Nearby Pickup Requests</h3>
+          </div>
+          <div class="table-container" style="margin-top: 1rem;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ticket Details</th>
+                  <th>Location & Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ticket in available_tickets %}
+                <tr id="available-ticket-row-{{ ticket.id }}">
+                  <td>
+                    <strong>{{ ticket.get_category_display }}</strong>
+                    <div class="muted" style="font-size: 0.8rem;">Est. Weight: {{ ticket.estimated_weight }} kg</div>
+                    <div class="muted" style="font-size: 0.8rem;">Raised: {{ ticket.created_at|date:"Y-m-d" }}</div>
+                  </td>
+                  <td>
+                    <div style="font-weight: 500;">{{ ticket.user.username }}</div>
+                    <div style="font-size: 0.85rem;">{{ ticket.address }}</div>
+                    <div style="font-size: 0.85rem; font-family: monospace;">{{ ticket.phone_number }}</div>
+                  </td>
+                  <td>
+                    <button class="btn" onclick="claimTicket({{ ticket.id }})" style="padding: 0.5rem 0.8rem; font-size: 0.8rem;">
+                      <i class="fas fa-hand-holding-hand"></i> Claim
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" style="text-align: center; color: var(--muted); padding: 2rem;">No pending pickup requests in your region right now.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Claimed / In-Progress Pickups -->
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-truck-ramp-box" style="color: var(--primary)"></i> Your Claimed Pickups</h3>
+          </div>
+          <div class="table-container" style="margin-top: 1rem;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ticket Details</th>
+                  <th>Location & Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ticket in claimed_tickets %}
+                <tr id="claimed-ticket-row-{{ ticket.id }}">
+                  <td>
+                    <strong>{{ ticket.get_category_display }}</strong>
+                    <div class="muted" style="font-size: 0.8rem;">Est. Weight: {{ ticket.estimated_weight }} kg</div>
+                    <div style="font-size: 0.8rem; font-family: monospace; color: var(--primary);">User ID: {{ ticket.user.profile.household_id }}</div>
+                  </td>
+                  <td>
+                    <div style="font-weight: 500;">{{ ticket.user.first_name }} {{ ticket.user.last_name }}</div>
+                    <div style="font-size: 0.85rem;">{{ ticket.address }}</div>
+                    <div style="font-size: 0.85rem; font-family: monospace;">{{ ticket.phone_number }}</div>
+                  </td>
+                  <td>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                      <button class="btn" onclick="promptCompletePickup({{ ticket.id }}, '{{ ticket.user.profile.household_id }}', '{{ ticket.get_category_display }}')" style="padding: 0.5rem 0.8rem; font-size: 0.8rem; background: linear-gradient(135deg, var(--primary), var(--primary-glow));">
+                        <i class="fas fa-check"></i> Complete
+                      </button>
+                      <button class="btn btn-danger" onclick="cancelClaim({{ ticket.id }})" style="padding: 0.5rem 0.8rem; font-size: 0.8rem;">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" style="text-align: center; color: var(--muted); padding: 2rem;">You haven't claimed any pickups yet. Claim one from the left panel!</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Recent Transactions Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-history" style="color: var(--primary)"></i> Recent Verified Drop-offs</h3>
+        </div>
+        <div class="table-container">
+          <table id="transactionsTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Member Username</th>
+                <th>Category</th>
+                <th>Weight (Kgs)</th>
+                <th>Tokens Issued</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for col in collections %}
+              <tr>
+                <td>{{ col.date|date:"Y-m-d" }}</td>
+                <td>{{ col.user.username }}</td>
+                <td><strong>{{ col.get_category_display }}</strong></td>
+                <td>{{ col.weight }} kg</td>
+                <td><strong style="color: #10b981;">+{{ col.tokens_earned }}</strong></td>
+                <td><span class="badge success">Verified</span></td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">No drop-offs recorded yet. Verify a user to start accepting waste!</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Theme Toggle
+    const t=document.getElementById('themeToggle');
+    t.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
+    if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';
+
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    if (menuToggle && sidebar) {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+    }
+
+    // Verify Member logic
+    let verifiedMemberId = null;
+    const btnVerifyMember = document.getElementById('btnVerifyMember');
+    const memberIdInput = document.getElementById('memberIdInput');
+    const userDetails = document.getElementById('userDetails');
+    const dropoffForm = document.getElementById('dropoffForm');
+    const mainAlert = document.getElementById('mainAlert');
+
+    const showAlert = (message, isError = false) => {
+      mainAlert.style.display = 'block';
+      mainAlert.className = 'alert ' + (isError ? 'alert-danger' : 'alert-success');
+      mainAlert.innerText = message;
+      setTimeout(() => { mainAlert.style.display = 'none'; }, 6000);
+    };
+
+    btnVerifyMember.addEventListener('click', async () => {
+      const userId = memberIdInput.value.trim();
+      if (!userId) return;
+
+      try {
+        const response = await fetch(`/api/bank/validate-user/?user_id=${userId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          verifiedMemberId = userId;
+          document.getElementById('valName').innerText = data.name || data.username;
+          document.getElementById('valEmail').innerText = data.email;
+          document.getElementById('valPhone').innerText = data.phone || 'N/A';
+          
+          userDetails.style.display = 'block';
+          dropoffForm.style.opacity = '1';
+          dropoffForm.style.pointerEvents = 'auto';
+          showAlert("✅ Member verified successfully!");
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        verifiedMemberId = null;
+        userDetails.style.display = 'none';
+        dropoffForm.style.opacity = '0.5';
+        dropoffForm.style.pointerEvents = 'none';
+        showAlert("❌ " + err.message, true);
+      }
+    });
+
+    // Calculate dynamic tokens rate based on category
+    const dropoffCategory = document.getElementById('dropoffCategory');
+    const dropoffWeight = document.getElementById('dropoffWeight');
+    const calculatedTokens = document.getElementById('calculatedTokens');
+
+    const recalculateTokens = () => {
+      const weight = parseFloat(dropoffWeight.value) || 0;
+      const cat = dropoffCategory.value;
+      
+      // I can check local requirements rates if any
+      let rate = 10; // Default
+      // In JS, check the rows of the requirements table for a rate
+      const rows = document.querySelectorAll('#requirementsTable tbody tr');
+      rows.forEach(row => {
+        const catCell = row.cells[0];
+        if (catCell && catCell.innerText.toLowerCase().includes(dropoffCategory.options[dropoffCategory.selectedIndex].text.toLowerCase())) {
+          const rateCell = row.cells[3];
+          if (rateCell) {
+            const matches = rateCell.innerText.match(/(\d+)/);
+            if (matches) rate = parseInt(matches[0]);
+          }
+        }
+      });
+
+      calculatedTokens.innerText = Math.round(weight * rate);
+    };
+
+    dropoffCategory.addEventListener('change', recalculateTokens);
+    dropoffWeight.addEventListener('input', recalculateTokens);
+
+    // Record Collection Dropoff
+    const btnSubmitDropoff = document.getElementById('btnSubmitDropoff');
+    btnSubmitDropoff.addEventListener('click', async () => {
+      if (!verifiedMemberId) return;
+      const category = dropoffCategory.value;
+      const weight = parseFloat(dropoffWeight.value) || 0;
+
+      if (weight <= 0) {
+        showAlert("❌ Please enter a weight greater than 0.", true);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/bank/record-collection/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            user_id: verifiedMemberId,
+            category: category,
+            weight: weight
+          })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          showAlert(`✅ Success! Rewarded ${data.user_name} with ${data.tokens_earned} ZeroTokens.`);
+          // Reset form
+          memberIdInput.value = '';
+          verifiedMemberId = null;
+          userDetails.style.display = 'none';
+          dropoffForm.style.opacity = '0.5';
+          dropoffForm.style.pointerEvents = 'none';
+          dropoffWeight.value = '';
+          calculatedTokens.innerText = '0';
+          
+          // Reload page to update tables/stats
+          setTimeout(() => { window.location.reload(); }, 1500);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        showAlert("❌ Drop-off log failed: " + err.message, true);
+      }
+    });
+
+    // Create Waste Requirement
+    const btnPostReq = document.getElementById('btnPostReq');
+    btnPostReq.addEventListener('click', async () => {
+      const category = document.getElementById('reqCategory').value;
+      const quantity = parseFloat(document.getElementById('reqQuantity').value) || 0;
+      const rate = parseInt(document.getElementById('reqRate').value) || 10;
+
+      if (quantity <= 0 || rate <= 0) {
+        showAlert("❌ Quantities and Rates must be greater than 0.", true);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/bank/requirements/create/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            category: category,
+            quantity_required: quantity,
+            tokens_per_kg: rate
+          })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert("✅ Waste requirement posted successfully!");
+          document.getElementById('reqQuantity').value = '';
+          document.getElementById('reqRate').value = '15';
+          
+          setTimeout(() => { window.location.reload(); }, 1500);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        showAlert("❌ Failed to post requirement: " + err.message, true);
+      }
+    });
+
+    // Delete requirement
+    window.deleteRequirement = async (reqId) => {
+      if (!confirm("Are you sure you want to delete this waste requirement?")) return;
+
+      try {
+        const response = await fetch(`/api/bank/requirements/delete/${reqId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          }
+        });
+        
+        if (response.ok) {
+          showAlert("🗑️ Requirement removed.");
+          const row = document.getElementById(`req-row-${reqId}`);
+          if (row) row.remove();
+          
+          setTimeout(() => { window.location.reload(); }, 1500);
+        } else {
+          const data = await response.json();
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        showAlert("❌ Delete failed: " + err.message, true);
+      }
+    };
+    // Claim Ticket
+    window.claimTicket = async (ticketId) => {
+      try {
+        const response = await fetch(`/api/tickets/claim/${ticketId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          }
+        });
+        
+        if (response.ok) {
+          showAlert("✅ Ticket claimed! Drive safe to pickup.");
+          setTimeout(() => { window.location.reload(); }, 1500);
+        } else {
+          const data = await response.json();
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        showAlert("❌ Claim failed: " + err.message, true);
+      }
+    };
+
+    // Cancel Claim
+    window.cancelClaim = async (ticketId) => {
+      if (!confirm("Are you sure you want to cancel your claim on this pickup request?")) return;
+
+      try {
+        const response = await fetch(`/api/tickets/cancel/${ticketId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          }
+        });
+        
+        if (response.ok) {
+          showAlert("🗑️ Claim cancelled. Ticket returned to pending list.");
+          setTimeout(() => { window.location.reload(); }, 1500);
+        } else {
+          const data = await response.json();
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        showAlert("❌ Cancellation failed: " + err.message, true);
+      }
+    };
+
+    // Complete Pickup Prompt
+    window.promptCompletePickup = async (ticketId, memberId, categoryName) => {
+      const weightStr = prompt(`User ID: ${memberId}\nWaste: ${categoryName}\n\nPlease enter the actual measured weight (in Kgs):`);
+      if (weightStr === null) return; // Cancelled
+      
+      const weight = parseFloat(weightStr);
+      if (isNaN(weight) || weight <= 0) {
+        alert("Please enter a valid weight greater than 0.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/tickets/complete/${ticketId}/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            actual_weight: weight
+          })
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+          showAlert(`✅ Success! Rewarded user with ${data.tokens_earned} ZeroTokens.`);
+          setTimeout(() => { window.location.reload(); }, 1500);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        showAlert("❌ Complete failed: " + err.message, true);
+      }
+    };
+  </script>
+</body>
+</html>

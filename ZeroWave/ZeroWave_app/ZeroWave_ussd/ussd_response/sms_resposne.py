@@ -33,4 +33,4 @@ def send_message(phone_number, message_context):
         print(response)
 
     except Exception as e:
-        print(f'Houston, we have a problem: {e}')
+        print(f'SMS delivery failed: {e}')

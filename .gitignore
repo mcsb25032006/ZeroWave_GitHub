@@ -213,3 +213,6 @@ findings.txt
 **/firebase-credentials.json
 firebase-credentials.json
 
+# Root video file copy (only track under staticfiles for deployment)
+/ZeroWave/ZeroWave.mp4
+
