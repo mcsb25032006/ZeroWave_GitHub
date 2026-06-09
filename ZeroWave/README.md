@@ -38,7 +38,7 @@ The primary goal of ZeroWave is to democratize environmental conservation, waste
 ```mermaid
 graph TD
     A[User Visits ZeroWave Web / Dials USSD] -->|Web| B[Firebase Sign Up / Sign In]
-    A -->|USSD| C[Africa's Talking USSD Gateway]
+    A -->|USSD| C[Telecom USSD Gateway]
     B -->|Frontend Auth Success| D[Django Session Verification via Firebase ID Token]
     D -->|Session Started| E[User Accesses Web Dashboard]
     C -->|Flask USSD Route| F[Check Balance / Redeem Tokens / Request AI Eco-Tips]
@@ -61,7 +61,7 @@ graph TD
 *   **Database**: PostgreSQL (hosted on Supabase) with local SQLite development fallback.
 *   **Authentication**: Client-side Firebase Authentication verified securely via `firebase-admin` SDK.
 *   **AI Integrations**: Google GenAI SDK (`gemini-2.5-flash` model for chat assistance and USSD automated SMS tip generator).
-*   **USSD/SMS Sub-module**: Flask-based web service integrating with Africa's Talking API.
+*   **USSD/SMS Sub-module**: Flask-based web service integrating with Telecom USSD API (e.g. Africa's Talking / Gupshup compatibility).
 *   **Observability & Analytics**: Opik SDK (for tracking AI generator trace steps).
 *   **Geospatial & Charts**: Leaflet.js (for map geolocation), Chart.js (for analytics rendering).
 
@@ -220,8 +220,8 @@ FIREBASE_APP_ID=your_app_id
 FIREBASE_CLIENT_EMAIL=your_service_account_email
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour_private_key\n-----END PRIVATE KEY-----"
 
-# Africa's Talking API config
-AT_API_KEY=your_africas_talking_api_key
+# Telecom USSD/SMS Gateway config (API Key credential)
+AT_API_KEY=your_telecom_api_key
 ```
 
 ### 4. Run Migrations & Apply Seeds
@@ -245,7 +245,7 @@ Open a new terminal window, activate the venv, and run:
 cd ZeroWave
 python ZeroWave_app/ZeroWave_ussd/ussd.py
 ```
-This launches a listener at `http://127.0.0.1:8000/ussd` that can be mapped to Africa's Talking sandbox.
+This launches a listener at `http://127.0.0.1:8000/ussd` that can be mapped to a Telecom USSD sandbox.
 
 ### 7. Run Unit Tests
 ```powershell
@@ -276,7 +276,7 @@ Render hosts your persistent Django backend and database connections:
 3. Set **Build Command** to `pip install -r requirements.txt`.
 4. Set **Start Command** to `gunicorn ZeroWave_app.ZeroWave_ussd.ussd:app`.
 5. Configure `GOOGLE_API_KEY` and `AT_API_KEY` in environment settings, then deploy.
-6. Link the generated public webhook URL to your **Africa's Talking Sandbox** dashboard.
+6. Link the generated public webhook URL to your **Telecom Sandbox USSD** dashboard.
 
 ---
 

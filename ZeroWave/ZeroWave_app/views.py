@@ -818,13 +818,13 @@ def _get_local_fallback_response(prompt: str, reason: str = "expired") -> str:
     elif "how are you" in msg:
         return "I am doing great, thank you! I'm ready to help you save the planet and manage ZeroTokens."
     elif "token" in msg:
-        return "ZeroTokens are earned by dropping off sorted waste at ZeroWave hubs. You can redeem them for rewards like Koko Fuel, KPLC tokens, and solar lights."
+        return "ZeroTokens are earned by dropping off sorted waste at ZeroWave hubs. You can redeem them for rewards like Tata Power solar support, Ola S1 rides, and LPG subsidies."
     elif "waste" in msg or "recycle" in msg or "drop" in msg:
         return "You can drop off sorted waste (organic, plastic, metals, e-waste) at any ZeroWave hubs to earn ZeroTokens."
     elif "hub" in msg or "station" in msg or "nearby" in msg:
         return "You can find nearby ZeroWave collection points and community hubs on the 'Nearby' map."
     elif "solar" in msg:
-        return "Solar energy systems are highly recommended in East Africa. ZeroWave partner rewards include subsidized solar installations and SunKing solar lights."
+        return "Solar energy systems are highly recommended in India. ZeroWave partner rewards include subsidized rooftop solar support through Tata Power Solar."
     elif "energy" in msg or "power" in msg:
         return "ZeroWave converts waste into energy using technologies like anaerobic digestion to produce biogas and organic fertilizers. You earn ZeroTokens for contributing!"
     else:
