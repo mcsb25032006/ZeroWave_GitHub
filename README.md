@@ -256,27 +256,39 @@ python manage.py test
 
 ## 8. Deployment Guide
 
-### A. Vercel (Frontend & Serverless Views)
-Vercel is used to host your Django templates and serverless web views using the configured `vercel.json` at the root of the project:
-1. Connect your GitHub repository to **Vercel**.
-2. Add your environment variables in Vercel project settings (ensure `FIREBASE_PRIVATE_KEY` and `FIREBASE_CLIENT_EMAIL` are configured so Vercel can initialize Firebase Admin without the file).
-3. Click **Deploy**. Vercel will serve your app.
+### A. Vercel (Web Frontend)
+Vercel hosts the web frontend and Django serverless views. The deployment uses the configured `vercel.json` at the root of the project to build both the python entrypoint and static assets:
+1. **GitHub Connection:** Connect your GitHub repository to **Vercel**.
+2. **Root Configuration:** Ensure the build settings are left at defaults (Vercel will automatically read the root [vercel.json](file:///C:/Users/sragv/VSCODEWORK/Full_Stack_Projects/ZeroWave/vercel.json) and execute [build_files.sh](file:///C:/Users/sragv/VSCODEWORK/Full_Stack_Projects/ZeroWave/build_files.sh) to install dependencies and run `collectstatic`).
+3. **Environment Variables:** In the Vercel project dashboard, navigate to **Settings** → **Environment Variables** and add the following keys from your `.env`:
+   * `DATABASE_URL` (Supabase Postgres string)
+   * `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`
+   * `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` (to allow Firebase Admin token verification without exposing credentials in git)
+   * `GOOGLE_API_KEY` (Gemini chatbot API)
+4. **Deploy:** Click **Deploy**. Vercel compiles the static files onto the edge network CDN and routes the web views through Django's WSGI application.
 
 ### B. Render (Backend Web Service)
-Render hosts your persistent Django backend and database connections:
-1. Log in to **Render** and click **New Web Service**, linking your Git repository.
-2. Set **Root Directory** to `ZeroWave`.
-3. Set **Build Command** to `pip install -r requirements.txt && python manage.py collectstatic --noinput`.
-4. Set **Start Command** to `gunicorn ZeroWave.wsgi:application`.
-5. Insert your environment variables under advanced settings and click **Create Web Service**.
+Render hosts the persistent Django server APIs, database connections, and ticket handlers:
+1. **GitHub Connection:** Log in to **Render** and click **New Web Service**, linking your Git repository.
+2. **Root Directory:** Set **Root Directory** to `ZeroWave`.
+3. **Build Command:** Set to `pip install -r requirements.txt`.
+4. **Start Command:** Set to `gunicorn ZeroWave.wsgi:application --timeout 90`. *(Note: The `--timeout 90` is recommended to prevent Gunicorn boot timeouts under throttled CPU environments).*
+5. **Environment Variables:** Set your `.env` variables (`DATABASE_URL`, Firebase credentials, Google API key) under **Environment** and click **Create Web Service**.
+6. **Allowed Hosts:** The Django configuration is pre-whitelisted for `.onrender.com` subdomains, preventing `DisallowedHost` routing errors.
 
 ### C. USSD Gateway (Render Web Service)
-1. In Render, click **New Web Service** and select the same repository.
-2. Set **Root Directory** to `ZeroWave`.
-3. Set **Build Command** to `pip install -r requirements.txt`.
-4. Set **Start Command** to `gunicorn ZeroWave_app.ZeroWave_ussd.ussd:app`.
-5. Configure `GOOGLE_API_KEY` and `AT_API_KEY` in environment settings, then deploy.
-6. Link the generated public webhook URL to your **Telecom Sandbox USSD** dashboard.
+The low-connectivity telecom USSD Flask microservice runs on Render:
+1. **GitHub Connection:** In Render, click **New Web Service** and select the same repository.
+2. **Root Directory:** Set **Root Directory** to `ZeroWave`.
+3. **Build Command:** Set to `pip install -r requirements.txt`.
+4. **Start Command:** Set to `gunicorn ZeroWave_app.ZeroWave_ussd.ussd:app --timeout 90`.
+5. **Environment Variables:** Configure `GOOGLE_API_KEY` (Gemini API) and `AT_API_KEY` (Telecom SMS API Key) in the environment settings, then deploy.
+6. **Linking Dashboard Callback:** 
+   * Copy the deployed USSD URL (e.g., `https://zerowave-ussd.onrender.com/ussd`).
+   * Log into your **Africa's Talking Sandbox Dashboard**.
+   * Go to **USSD** → **USSD Service Codes** → **Configure**.
+   * Set **Callback URL** to your Render USSD endpoint and configure a numeric **Channel Suffix** (e.g. `90607`).
+   * Dial `*384*90607#` inside the Africa's Talking simulator client to verify.
 
 ---
 
