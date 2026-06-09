@@ -6,6 +6,14 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    from dotenv import load_dotenv
+    from pathlib import Path
+    
+    # Load .env from project root and nested directories
+    BASE_DIR = Path(__file__).resolve().parent
+    load_dotenv(BASE_DIR / '../.env')
+    load_dotenv(BASE_DIR / '.env')
+    
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ZeroWave.settings')
     try:
         from django.core.management import execute_from_command_line
