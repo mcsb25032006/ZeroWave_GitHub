@@ -1,16 +1,16 @@
-# ZeroWave — Waste-to-Energy and Sustainability Platform
+# ZeroWave — Sustainability & Waste-to-Energy Platform (India)
 
-ZeroWave is a premium, full-stack sustainability and green rewards platform designed to incentivize dry waste segregation, promote circular economy practices (biogas generation, recycling), and build eco-friendly communities. 
+ZeroWave is a premium, full-stack sustainability and green rewards platform designed to incentivize dry waste segregation, promote circular economy practices (biogas generation, recycling), and build eco-friendly communities across India. 
 
-The platform allows individuals to earn **ZeroTokens** and **Carbon Credits** by dropping off sorted waste (organic, plastics, paper, metal, e-waste) at collection hubs. These tokens can be redeemed for local Indian utility rewards, green transit discounts, clean cooking fuel, and solar energy support.
+The platform allows individuals to earn **ZeroTokens** and **Carbon Credits** by dropping off sorted waste (organic, plastics, paper, metal, e-waste) at collection hubs. These tokens can be redeemed for green rewards like **Tata Power Rooftop Solar** installation discounts, **Swachh Cities Credits** (municipal bill offsets), **Ola S1 EV Rides** vouchers, clean cooking LPG cylinder subsidies, and e-waste cashbacks at partners like **Croma** and **Reliance Digital**.
 
-ZeroWave features a responsive web interface equipped with an interactive AI Chatbot (powered by Google Gemini), Leaflet maps for geolocating collection hubs, and a low-connectivity USSD sub-module for users with basic mobile phones or poor internet access.
+ZeroWave features a responsive web interface equipped with an interactive AI Chatbot (powered by Google Gemini), Leaflet maps for geolocating collection hubs across major Indian metros, and a low-connectivity USSD sub-module for users with basic mobile phones or poor internet access.
 
 ---
 
 ## 1. Aim of the Project
 
-The primary goal of ZeroWave is to democratize waste-to-energy initiatives and dry waste segregation. By combining financial incentives (ZeroTokens and Carbon Credits) with accessible tools (such as low-bandwidth offline USSD interfaces and advanced web diagnostics), ZeroWave drives behavioral change towards clean energy conversion and a sustainable circular economy.
+The primary goal of ZeroWave is to democratize environmental conservation, waste-to-energy conversion, and dry waste segregation in India, aligned with the **Swachh Bharat Mission (Urban 2.0)** goals. By combining financial incentives (ZeroTokens and Carbon Credits) with accessible tools (such as low-bandwidth offline USSD interfaces and advanced web diagnostics), ZeroWave drives behavioral change towards clean energy conversion and a sustainable circular economy.
 
 ---
 
@@ -23,10 +23,10 @@ The primary goal of ZeroWave is to democratize waste-to-energy initiatives and d
 *   **Eco-Rewards Hub**: Users spend ZeroTokens to redeem vouchers for:
     *   *Tata Power Rooftop Solar*: Subsidies on home solar installations.
     *   *Swachh Cities Credits*: Offsets for municipal waste/water bills.
-    *   *Ola S1 EV Rides*: Subsidized electric scooter rides.
+    *   *Ola S1 EV Rides*: Subsidized electric scooter rides to contribute to smog-free Indian roads.
     *   *Clean Cooking Gas*: LPG cylinder refills or stove accessories.
     *   *E-Waste Buyback*: Cashback vouchers at retail partners like Croma and Reliance Digital.
-*   **Geospatial Hub Locator (Leaflet)**: Interactive map showing nearby collection points, color-coded by occupancy status (*Empty*, *Pre-Occupied*, *Fully Occupied*) based on log weights.
+*   **Geospatial Hub Locator (Leaflet)**: Interactive map showing nearby collection points in major cities (Bengaluru, Mumbai, Delhi NCR, Pune, Chennai, Hyderabad, Kolkata), color-coded by occupancy status (*Empty*, *Pre-Occupied*, *Fully Occupied*) based on log weights.
 *   **Carbon Credit Marketplace**: A mini-exchange where users can sell carbon credits for INR or buy credits to offset their footprints, tracking transactions on a ledger.
 *   **AI Sustainability Advisor**: A floating chatbot interface powered by `gemini-2.5-flash` that answers environmental queries (with a robust local rule-based fallback system).
 *   **Offline USSD Gateway**: A Flask USSD simulator supporting offline interactions (balance checks, redemptions, reporting illegal dumping, and requesting AI-generated eco-tips sent via SMS alerts).
@@ -97,7 +97,7 @@ Extends the standard Django User model. Tracks tokens, credits, roles, and regio
 *   `total_energy_generated` (DecimalField)
 *   `trees_planted` (IntegerField)
 *   `bank_name` (CharField, optional)
-*   `region` (CharField: delhi, mumbai, bengaluru, etc.)
+*   `region` (CharField: delhi, mumbai, bengaluru, hyderabad, chennai, kolkata, pune)
 
 ### 2. WasteCollection
 Logs verified waste drop-offs at collection hubs.
@@ -282,4 +282,4 @@ Render hosts your persistent Django backend and database connections:
 
 ## 9. Conclusion
 
-ZeroWave bridges the gap between digital waste accountability and local clean energy incentives. By offering a high-fidelity analytics dashboard alongside an offline-friendly USSD gateway, the platform removes barriers to entry for waste recycling in urban centers. Supported by Google's generative models, robust database schemas, and structured web services, ZeroWave equips users with the knowledge and rewards required to transition communities into sustainable, circular hubs.
+ZeroWave bridges the gap between digital waste accountability and local clean energy incentives. By offering a high-fidelity analytics dashboard alongside an offline-friendly USSD gateway, the platform removes barriers to entry for waste recycling in urban centers. Supported by Google's generative models, robust database schemas, and structured web services, ZeroWave equips users with the knowledge and rewards required to transition Indian cities into clean, sustainable, and circular hubs.
