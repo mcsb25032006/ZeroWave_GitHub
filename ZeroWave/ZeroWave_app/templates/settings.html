@@ -36,9 +36,40 @@
       --card: #18222f;
       --border: #253447;
     }
-    
     [data-theme="dark"] body {
-      background: var(--bg);
+      background: var(--bg) !important;
+      color: var(--text) !important;
+    }
+    [data-theme="dark"] .card {
+      background: var(--card) !important;
+      border-color: var(--border) !important;
+      color: var(--text) !important;
+    }
+    [data-theme="dark"] h1,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] label,
+    [data-theme="dark"] strong,
+    [data-theme="dark"] input,
+    [data-theme="dark"] select,
+    [data-theme="dark"] option,
+    [data-theme="dark"] p {
+      color: var(--text) !important;
+    }
+    [data-theme="dark"] .muted {
+      color: var(--muted) !important;
+    }
+    [data-theme="dark"] select option {
+      background-color: var(--card) !important;
+      color: var(--text) !important;
+    }
+    [data-theme="dark"] input[type="text"],
+    [data-theme="dark"] input[type="email"],
+    [data-theme="dark"] input[type="password"],
+    [data-theme="dark"] select {
+      border-color: var(--border) !important;
+      color: var(--text) !important;
+      background-color: rgba(255, 255, 255, 0.05) !important;
     }
     *{box-sizing:border-box}
     body{margin:0;background: linear-gradient(135deg, #FFFDF9 0%, #FFF6DE 100%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex}

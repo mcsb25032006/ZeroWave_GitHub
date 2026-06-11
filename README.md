@@ -1,4 +1,6 @@
-# ZeroWave — Sustainability & Waste-to-Energy Platform (India)
+# 🌍 ZeroWave — Sustainability & Waste-to-Energy Platform (India)
+
+🚀 **Vercel Production Link:** [https://zero-wave.vercel.app](https://zero-wave.vercel.app)
 
 ZeroWave is a premium, full-stack sustainability and green rewards platform designed to incentivize dry waste segregation, promote circular economy practices (biogas generation, recycling), and build eco-friendly communities across India. 
 

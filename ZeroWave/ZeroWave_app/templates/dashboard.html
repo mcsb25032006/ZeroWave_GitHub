@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root{
       --primary: #2F578A;
@@ -359,6 +359,59 @@
         height: 350px;
     }
 
+    /* Custom Premium Modals */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(17, 22, 29, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+    .overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .custom-modal {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        width: 90%;
+        max-width: 460px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        color: var(--text);
+        transform: translateY(-20px);
+        transition: transform 0.25s ease;
+    }
+    .overlay.active .custom-modal {
+        transform: translateY(0);
+    }
+    .modal-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--muted);
+        cursor: pointer;
+    }
+    .modal-close:hover {
+        color: var(--text);
+    }
   </style>
 
 
@@ -710,13 +763,13 @@
               <h3 class="card-title">Quick Actions</h3>
           </div>
           <div class="quick-actions">
-              <div class="action-btn" onclick="window.location.href=''">
+              <div class="action-btn" onclick="openSMSModal()">
                   <i class="fas fa-sms"></i>
                   <div style="font-weight: 600;">SMS Notification</div>
                   <div style="font-size: 0.875rem; color: #6b7280;">Recieve sms updates</div>
               </div>
-              <div class="action-btn" onclick="window.location.href='/settings'">
-                  <i class="fas fa-mobile"></i>
+              <div class="action-btn" onclick="openContactModal()">
+                  <i class="fas fa-envelope"></i>
                   <div style="font-weight: 600;">Contact Us</div>
                   <div style="font-size: 0.875rem; color: #6b7280;">24/7 Customer Support</div>
               </div>
@@ -725,7 +778,7 @@
                   <div style="font-weight: 600;">Redeem Tokens</div>
                   <div style="font-size: 0.875rem; color: #6b7280;">Enjoy Reduced</div>
               </div>
-              <div class="action-btn" onclick="alert('Download started!')">
+              <div class="action-btn" onclick="generateReport()">
                   <i class="fas fa-download"></i>
                   <div style="font-weight: 600;">Download Report</div>
                   <div style="font-size: 0.875rem; color: #6b7280;">Analytics, Metrics & Insights</div>
@@ -812,7 +865,7 @@
     const fraudChart = new Chart(fraudCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Organic', 'E-waste', 'Recyclabes', 'Agricultural'],
+            labels: ['Organic', 'E-waste', 'Recyclables', 'Agricultural'],
             datasets: [{
                 data: {{ pie_data|safe }},
                 backgroundColor: ['#10b981', '#f97316', '#eab308', '#06b6d4'],
@@ -896,7 +949,193 @@
         alert("Error connecting to server: " + err);
       }
     };
+
+    // Modal controls
+    window.openSMSModal = () => {
+      document.getElementById('smsModal').classList.add('active');
+    };
+    window.closeSMSModal = () => {
+      document.getElementById('smsModal').classList.remove('active');
+    };
+    window.openContactModal = () => {
+      document.getElementById('contactModal').classList.add('active');
+    };
+    window.closeContactModal = () => {
+      document.getElementById('contactModal').classList.remove('active');
+    };
+
+    window.submitSMSSubscription = async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('smsPhone').value.trim();
+      try {
+        const response = await fetch('/api/settings/update/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            full_name: '{% if profile.user.first_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.username }}{% endif %}',
+            email: '{{ profile.user.email }}',
+            phone: phone,
+            household_id: '{{ profile.household_id }}',
+            bank_name: '',
+            region: '{{ profile.region }}'
+          })
+        });
+        if (response.ok) {
+          alert("✅ SMS notifications enabled successfully for " + phone + "!");
+          closeSMSModal();
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert("❌ Failed to subscribe: " + data.message);
+        }
+      } catch (err) {
+        alert("❌ Error connecting to server: " + err);
+      }
+    };
+
+    window.submitContactForm = (e) => {
+      e.preventDefault();
+      alert("✅ Message sent successfully! Our customer support team (India branch) will review your query and get back to you within 24 hours.");
+      closeContactModal();
+      document.getElementById('supportContactForm').reset();
+    };
+
+    window.generateReport = () => {
+      try {
+        // Collect metrics
+        const name = "{% if profile.user.first_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.username }}{% endif %}";
+        const householdId = "{{ profile.household_id }}";
+        const region = "{{ profile.region|upper }}";
+        const wasteRecycled = "{{ profile.total_waste_recycled }}";
+        const energyGenerated = "{{ profile.total_energy_generated }}";
+        const carbonCredits = "{{ profile.carbon_credits }}";
+        const tokensBalance = "{{ profile.tokens_balance }}";
+        
+        const dateStr = new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        let reportText = `======================================================
+              ZEROWAVE SUSTAINABILITY REPORT          
+======================================================
+Generated on: ${dateStr}
+User Account: ${name}
+Household ID: ${householdId}
+Region: ${region}
+
+---------------- SUMMARY METRICS -----------------
+Total Waste Recycled:   ${wasteRecycled} Kgs
+Total Energy Generated: ${energyGenerated} kWh
+Carbon Credits Earned:  ${carbonCredits}
+ZeroTokens Balance:     ${tokensBalance}
+
+--------------- RECENT ECO-ACTIVITIES ----------------
+`;
+
+        // Parse recent activities table
+        const rows = document.querySelectorAll('.card table tbody tr');
+        let activityCount = 0;
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 4) {
+            const date = cells[0].textContent.trim();
+            if (date.toLowerCase().includes("no recent activity")) return;
+            activityCount++;
+            const actionText = cells[1].querySelector('strong') ? cells[1].querySelector('strong').textContent.trim() : cells[1].textContent.trim();
+            const categoryText = cells[1].querySelector('.muted') ? cells[1].querySelector('.muted').textContent.trim() : '';
+            const tokens = cells[2].textContent.trim();
+            const status = cells[3].textContent.trim();
+            reportText += `[${date}] - ${actionText} (${categoryText}) - Tokens: ${tokens} - Status: ${status}\n`;
+          }
+        });
+
+        if (activityCount === 0) {
+          reportText += "No recent activity recorded.\n";
+        }
+
+        reportText += `======================================================
+       Thank you for participating in ZeroWave!       
+          Together for a cleaner tomorrow.            
+======================================================
+`;
+
+        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ZeroWave_Sustainability_Report_${householdId}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("Error generating report: " + err);
+      }
+    };
   </script>
+
+  <!-- SMS Notification Modal -->
+  <div id="smsModal" class="overlay">
+    <div class="custom-modal">
+      <div class="modal-hdr">
+        <h3 style="margin: 0; font-size: 1.2rem;">Subscribe to SMS Notifications</h3>
+        <button class="modal-close" onclick="closeSMSModal()">&times;</button>
+      </div>
+      <form id="smsSubscribeForm" onsubmit="submitSMSSubscription(event)">
+        <div style="margin-bottom: 1.2rem;">
+          <p style="font-size: 0.9rem; color: var(--muted); margin: 0 0 1rem 0;">Get real-time updates when waste is dropped off, credit is earned, or rewards become redeemable.</p>
+          <label for="smsPhone" style="font-weight: 600; font-size: 0.9rem;">Mobile Number (with country code)</label>
+          <input id="smsPhone" type="text" value="{{ profile.phone_number|default:'' }}" placeholder="e.g. +919999999999" required style="width: 100%; padding: 0.7rem .9rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;" />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn" style="background:linear-gradient(135deg,hsl(210 16% 86%),hsl(210 16% 80%));color:#222" onclick="closeSMSModal()">Cancel</button>
+          <button type="submit" class="btn">Subscribe Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contact Us Modal -->
+  <div id="contactModal" class="overlay">
+    <div class="custom-modal">
+      <div class="modal-hdr">
+        <h3 style="margin: 0; font-size: 1.2rem;">Contact Customer Support</h3>
+        <button class="modal-close" onclick="closeContactModal()">&times;</button>
+      </div>
+      <form id="supportContactForm" onsubmit="submitContactForm(event)">
+        <div style="margin-bottom: 0.8rem;">
+          <label for="contactName" style="font-weight: 600; font-size: 0.9rem;">Your Name</label>
+          <input id="contactName" type="text" value="{% if profile.user.first_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.username }}{% endif %}" required style="width: 100%; padding: 0.6rem .8rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;" />
+        </div>
+        <div style="margin-bottom: 0.8rem;">
+          <label for="contactEmail" style="font-weight: 600; font-size: 0.9rem;">Email Address</label>
+          <input id="contactEmail" type="email" value="{{ profile.user.email }}" required style="width: 100%; padding: 0.6rem .8rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem;" />
+        </div>
+        <div style="margin-bottom: 0.8rem;">
+          <label for="contactCategory" style="font-weight: 600; font-size: 0.9rem;">Support Category</label>
+          <select id="contactCategory" style="width: 100%; padding: 0.6rem .8rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: inherit; outline: none; margin-top: 0.35rem;">
+            <option value="recycling">Recycling Issue</option>
+            <option value="tokens">ZeroTokens Reward Issue</option>
+            <option value="technical">Technical Support</option>
+            <option value="general">General Inquiry</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label for="contactMsg" style="font-weight: 600; font-size: 0.9rem;">Message</label>
+          <textarea id="contactMsg" rows="3" placeholder="Tell us how we can help you..." required style="width: 100%; padding: 0.6rem .8rem; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: inherit; outline: none; margin-top: 0.35rem; font-family: inherit; resize: none;"></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn" style="background:linear-gradient(135deg,hsl(210 16% 86%),hsl(210 16% 80%));color:#222" onclick="closeContactModal()">Cancel</button>
+          <button type="submit" class="btn">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
 

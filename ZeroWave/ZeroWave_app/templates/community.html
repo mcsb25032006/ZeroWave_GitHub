@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';</script>
   <meta charset="utf-8" />
   <title>ZeroWave — Community Hub</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -110,6 +111,15 @@
     [data-theme="dark"] .modal {
       background: var(--card);
       color: var(--text);
+    }
+    [data-theme="dark"] option {
+      background-color: var(--card) !important;
+      color: var(--text) !important;
+    }
+    [data-theme="dark"] input, [data-theme="dark"] textarea, [data-theme="dark"] select {
+      background-color: var(--card) !important;
+      color: var(--text) !important;
+      border-color: var(--border) !important;
     }
     [data-theme="dark"] .price {
       color: var(--primary-glow);
@@ -228,6 +238,7 @@
             <option value="education">Education</option>
           </select>
           <button class="btn" id="createCommunityBtn"><i class="fa-solid fa-plus"></i>&nbsp;Create Community</button>
+          <button id="themeToggle" class="ghost" aria-label="Toggle theme" style="padding:10px 12px; margin-left:5px;">🌓</button>
         </div>
       </header>
 
@@ -850,6 +861,13 @@
   window.closeModal = closeModal;
   window.createCommunity = createCommunity;
 
+  const tButton = document.getElementById('themeToggle');
+  if (tButton) {
+    tButton.addEventListener('click', () => {
+      document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
+      localStorage.setItem('theme', document.documentElement.dataset.theme || 'light');
+    });
+  }
   </script>
 </body>
 </html>
