@@ -202,7 +202,7 @@
 
       <div style="display:flex;align-items:center;gap:.5rem;justify-content:flex-end">
         <button class="btn" style="background:linear-gradient(135deg,hsl(210 16% 86%),hsl(210 16% 80%));color:#222">Cancel</button>
-        <button class="btn">Save Changes</button>
+        <button id="saveSettingsBtn" class="btn">Save Changes</button>
       </div>
     </main>
   </div>
@@ -214,7 +214,7 @@
     document.getElementById('greenMode').addEventListener('click',function(){this.dataset.on=this.dataset.on==='true'?'false':'true';document.documentElement.dataset.theme=this.dataset.on==='true'?'dark':'';localStorage.setItem('theme',document.documentElement.dataset.theme||'light')});
 
     // Save changes handler
-    document.querySelector('button.btn:last-child').addEventListener('click', async () => {
+    document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
         const fullNameEl = document.getElementById('fullName');
         const householdIdEl = document.getElementById('householdId');
         const bankNameEl = document.getElementById('bankName');

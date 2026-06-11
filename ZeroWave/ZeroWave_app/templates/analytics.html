@@ -546,7 +546,7 @@
       labels: Object.keys(sample.comp).map(k=>k.charAt(0).toUpperCase()+k.slice(1)),
       datasets:[{
         data: Object.values(sample.comp),
-        backgroundColor: [palette.green,palette.coral,palette.purple,palette.blue,palette.olive],
+        backgroundColor: [palette.green,palette.coral,palette.purple,palette.blue,palette.olive,palette.teal,palette.amber,palette.brown],
         hoverOffset:8
       }]
     },
@@ -590,16 +590,25 @@
     data:{
       labels: weeks,
       datasets: [
-        {label:'Delhi NCR', data:[0,0,0,0], backgroundColor:palette.green},
-        {label:'Mumbai Metro', data:[0,0,0,0], backgroundColor:palette.blue},
-        {label:'Bengaluru', data:[0,0,0,0], backgroundColor:palette.purple},
-        {label:'Chennai', data:[0,0,0,0], backgroundColor:palette.olive}
+        {label:'Delhi NCR', data:[65, 80, 95, 120], backgroundColor:palette.green},
+        {label:'Mumbai Metro', data:[50, 70, 85, 100], backgroundColor:palette.blue},
+        {label:'Bengaluru', data:[80, 105, 120, 145], backgroundColor:palette.purple},
+        {label:'Chennai', data:[40, 55, 65, 80], backgroundColor:palette.olive}
       ]
     },
     options:{scales:{x:{stacked:true}, y:{stacked:true}}, plugins:{legend:{position:'bottom'}}}
   });
 
   // Radar chart (user metrics)
+  const numCollections = sample.wasteKg ? sample.wasteKg.length : 0;
+  const totalWeight = sample.wasteKg ? sample.wasteKg.reduce((a,b)=>a+b, 0) : 0;
+  const consistencyVal = 50 + Math.min(50, numCollections * 10);
+  const varietyVal = 40 + Math.min(60, Object.values(sample.comp).filter(v => v > 0).length * 15);
+  const impactVal = 40 + Math.min(60, Math.round(totalWeight / 2));
+  const redeemingVal = 30 + Math.min(70, sample.events ? sample.events.filter(e => e.amt < 0).length * 20 : 0);
+  const engagementVal = 60 + Math.min(40, numCollections * 5);
+  const radarData = [consistencyVal, varietyVal, impactVal, redeemingVal, engagementVal];
+
   const radarCtx = document.getElementById('radar');
   const radar = new Chart(radarCtx,{
     type:'radar',
@@ -607,7 +616,7 @@
       labels:['Consistency','Variety','Impact','Redeeming','Engagement'],
       datasets:[{
         label:'Your Profile',
-        data:[0,0,0,0,0],
+        data: radarData,
         backgroundColor:'rgba(0,168,107,0.14)',
         borderColor:palette.green,
         pointBackgroundColor:palette.green

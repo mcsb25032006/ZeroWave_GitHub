@@ -249,18 +249,18 @@ def dashboard(request):
     for col in user_collections:
         cat = col.category.lower()
         w = float(col.weight)
-        if cat == 'organic': pie_data[0] += w
-        elif cat == 'e-waste': pie_data[1] += w
-        elif cat == 'recyclables': pie_data[2] += w
-        elif cat == 'agriculture': pie_data[3] += w
+        if cat in ['organic']: pie_data[0] += w
+        elif cat in ['e-waste', 'pharma']: pie_data[1] += w
+        elif cat in ['recyclables', 'metal', 'plastic', 'paper']: pie_data[2] += w
+        elif cat in ['agriculture']: pie_data[3] += w
         
         col_month = col.date.strftime('%b')
         if col_month in months_labels:
             m_idx = months_labels.index(col_month)
-            if cat == 'organic': organic_data[m_idx] += w
-            elif cat == 'e-waste': ewaste_data[m_idx] += w
-            elif cat == 'recyclables': recyclables_data[m_idx] += w
-            elif cat == 'agriculture': agriculture_data[m_idx] += w
+            if cat in ['organic']: organic_data[m_idx] += w
+            elif cat in ['e-waste', 'pharma']: ewaste_data[m_idx] += w
+            elif cat in ['recyclables', 'metal', 'plastic', 'paper']: recyclables_data[m_idx] += w
+            elif cat in ['agriculture']: agriculture_data[m_idx] += w
             
     active_requirements = WasteRequirement.objects.filter(status='Active', bank__profile__region=profile.region).order_by('-created_at')[:8]
     tickets = CollectionTicket.objects.filter(user=request.user).order_by('-created_at')[:10]
@@ -317,7 +317,16 @@ def analytics(request):
     energy_kwh = []
     tokens_issued = []
     
-    comp = {'organic': 0.0, 'e-waste': 0.0, 'recyclables': 0.0, 'agriculture': 0.0, 'other': 0.0}
+    comp = {
+        'organic': 0.0,
+        'e-waste': 0.0,
+        'recyclables': 0.0,
+        'agriculture': 0.0,
+        'metal': 0.0,
+        'pharma': 0.0,
+        'plastic': 0.0,
+        'paper': 0.0
+    }
     
     for c in collections:
         days.append(c.date.strftime('%Y-%m-%d'))
@@ -336,6 +345,14 @@ def analytics(request):
             'kg': float(dh.diverted_kg),
             'credits': dh.credits
         })
+    if not hubs:
+        hubs = [
+            {'name': 'Delhi Metro Recycling Hub', 'kg': 420.5, 'credits': 42},
+            {'name': 'Bengaluru Clean Hub', 'kg': 380.2, 'credits': 38},
+            {'name': 'Mumbai Green Brigade', 'kg': 310.0, 'credits': 31},
+            {'name': 'Pune Ecotech Center', 'kg': 285.5, 'credits': 28},
+            {'name': 'Chennai Solar Point', 'kg': 190.0, 'credits': 19}
+        ]
         
     anomalies = [
         {
