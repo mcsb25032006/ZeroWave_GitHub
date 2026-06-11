@@ -216,3 +216,7 @@ firebase-credentials.json
 # Root video file copy (only track under staticfiles for deployment)
 /ZeroWave/ZeroWave.mp4
 
+# Ignore compiled static directory
+/ZeroWave/static/
+
+
